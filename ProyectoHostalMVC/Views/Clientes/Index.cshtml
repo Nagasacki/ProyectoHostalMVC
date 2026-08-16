@@ -1,0 +1,90 @@
+﻿@model IEnumerable<ProyectoHostalMVC.Models.Cliente>
+
+@{
+    ViewData["Title"] = "Clientes";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>Gestión de Clientes</h2>
+
+        <a asp-action="Create"
+           class="btn btn-primary">
+
+            + Nuevo Cliente
+
+        </a>
+
+    </div>
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>ID</th>
+                        <th>DNI</th>
+                        <th>Nombre</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+
+                            <td>@item.IdCliente</td>
+
+                            <td>@item.Dni</td>
+
+                            <td>@item.Nombre</td>
+
+                            <td>@item.Telefono</td>
+
+                            <td>@item.Correo</td>
+
+                            <td>
+
+                                <a asp-action="Edit"
+                                   asp-route-id="@item.IdCliente"
+                                   class="btn btn-warning btn-sm">
+                                    Editar
+                                </a>
+
+                                <a asp-action="Details"
+                                   asp-route-id="@item.IdCliente"
+                                   class="btn btn-info btn-sm">
+                                    Ver
+                                </a>
+
+                                <a asp-action="Delete"
+                                   asp-route-id="@item.IdCliente"
+                                   class="btn btn-danger btn-sm">
+                                    Eliminar
+                                </a>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

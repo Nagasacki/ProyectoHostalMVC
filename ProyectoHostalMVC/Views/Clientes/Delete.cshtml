@@ -1,0 +1,95 @@
+﻿@model ProyectoHostalMVC.Models.Cliente
+
+@{
+    ViewData["Title"] = "Eliminar Cliente";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-danger text-white">
+            <h4 class="mb-0">
+                Eliminar Cliente
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="alert alert-warning">
+                ¿Está seguro que desea eliminar este cliente?
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>ID:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.IdCliente
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>DNI:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.Dni
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Nombre:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.Nombre
+                </div>
+            </div>
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Teléfono:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.Telefono
+                </div>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <strong>Correo:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.Correo
+                </div>
+            </div>
+
+            <form asp-action="Delete" method="post">
+
+                <input type="hidden"
+                       name="id"
+                       value="@Model.IdCliente" />
+
+                <button type="submit"
+                        class="btn btn-danger">
+                    Eliminar
+                </button>
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+                    Cancelar
+                </a>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>

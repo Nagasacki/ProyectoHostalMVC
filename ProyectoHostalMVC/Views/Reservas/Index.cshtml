@@ -1,0 +1,122 @@
+﻿@model IEnumerable<ProyectoHostalMVC.Models.Reserva>
+
+@{
+    ViewData["Title"] = "Reservas";
+}
+
+<div class="container mt-4">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <h2>Gestión de Reservas</h2>
+
+        <a asp-action="Create"
+           class="btn btn-primary">
+            + Nueva Reserva
+        </a>
+
+    </div>
+
+
+    <div class="card shadow-sm">
+
+        <div class="card-body">
+
+            <table class="table table-bordered table-hover">
+
+                <thead class="table-dark">
+
+                    <tr>
+                        <th>ID</th>
+                        <th>Cliente</th>
+                        <th>Habitación</th>
+                        <th>Tipo</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Días</th>
+                        <th>Total</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+
+                            <td>
+                                @item.IdReserva
+                            </td>
+
+                            <td>
+                                @item.NombreCliente
+                            </td>
+
+                            <td>
+                                @item.NumeroHabitacion
+                            </td>
+
+                            <td>
+                                @item.TipoHabitacion
+                            </td>
+
+                            <td>
+                                @item.FechaEntrada.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @item.FechaSalida.ToString("dd/MM/yyyy")
+                            </td>
+
+                            <td>
+                                @item.CantidadDias
+                            </td>
+
+                            <td>
+                                S/ @item.Total.ToString("0.00")
+                            </td>
+
+                            <td>
+
+                                @if (item.Estado == "Reservada")
+                                {
+                                    <span class="badge bg-success">
+                                        Reservada
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @item.Estado
+                                    </span>
+                                }
+                                
+
+                            </td>
+
+                            <td>
+
+                                <a asp-action="Details"
+                                   asp-route-id="@item.IdReserva"
+                                   class="btn btn-info btn-sm">
+                                    Ver
+                                </a>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>

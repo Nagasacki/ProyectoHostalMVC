@@ -1,0 +1,174 @@
+﻿@model ProyectoHostalMVC.Models.Dashboard
+
+@{
+    ViewData["Title"] = "Inicio";
+}
+
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+
+        <h2>
+            Dashboard
+        </h2>
+
+        <p class="text-muted">
+            Sistema de Gestión - Hostal Velamor
+        </p>
+
+    </div>
+
+
+    <div class="row g-4">
+
+        <!-- TOTAL HABITACIONES -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm border-primary">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Habitaciones
+                    </h5>
+
+                    <h1 class="text-primary">
+                        @Model.TotalHabitaciones
+                    </h1>
+
+                    <a asp-controller="Habitaciones"
+                       asp-action="Index"
+                       class="btn btn-primary btn-sm">
+
+                        Ver habitaciones
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- DISPONIBLES -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm border-success">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Disponibles
+                    </h5>
+
+                    <h1 class="text-success">
+                        @Model.HabitacionesDisponibles
+                    </h1>
+
+                    <p class="text-muted mb-0">
+                        Habitaciones disponibles
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- OCUPADAS -->
+
+        <div class="col-md-4">
+
+            <div class="card shadow-sm border-danger">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Ocupadas
+                    </h5>
+
+                    <h1 class="text-danger">
+                        @Model.HabitacionesOcupadas
+                    </h1>
+
+                    <p class="text-muted mb-0">
+                        Habitaciones ocupadas
+                    </p>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- CLIENTES -->
+
+        <div class="col-md-6">
+
+            <div class="card shadow-sm border-info">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Clientes
+                    </h5>
+
+                    <h1 class="text-info">
+                        @Model.TotalClientes
+                    </h1>
+
+                    <a asp-controller="Clientes"
+                       asp-action="Index"
+                       class="btn btn-info btn-sm">
+
+                        Ver clientes
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- RESERVAS -->
+
+        <div class="col-md-6">
+
+            <div class="card shadow-sm border-warning">
+
+                <div class="card-body">
+
+                    <h5 class="card-title">
+                        Reservas Activas
+                    </h5>
+
+                    <h1 class="text-warning">
+                        @Model.ReservasActivas
+                    </h1>
+
+                    <a asp-controller="Reservas"
+                       asp-action="Index"
+                       class="btn btn-warning btn-sm">
+
+                        Ver reservas
+
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+    </div>
+
+</div>

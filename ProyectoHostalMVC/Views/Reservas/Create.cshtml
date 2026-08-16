@@ -1,0 +1,294 @@
+﻿@model ProyectoHostalMVC.Models.Reserva
+
+@{
+    ViewData["Title"] = "Nueva Reserva";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+
+            <h4 class="mb-0">
+                Nueva Reserva
+            </h4>
+
+        </div>
+
+
+        <div class="card-body">
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">
+
+                    @ViewBag.Error
+
+                </div>
+            }
+
+
+            <form asp-action="Create"
+                  method="post">
+
+
+                <!-- CLIENTE -->
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Cliente
+                    </label>
+
+                    <select asp-for="IdCliente"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            Seleccione un cliente
+                        </option>
+
+                        @foreach (var cliente in ViewBag.Clientes)
+                        {
+                            <option value="@cliente.IdCliente">
+
+                                @cliente.Nombre
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- HABITACIÓN -->
+
+                <div class="mb-3">
+
+                    <label class="form-label">
+                        Habitación
+                    </label>
+
+                    <select asp-for="IdHabitacion"
+                            id="habitacion"
+                            class="form-select"
+                            required>
+
+                        <option value="">
+                            Seleccione una habitación
+                        </option>
+
+                        @foreach (var habitacion in ViewBag.Habitaciones)
+                        {
+                            <option value="@habitacion.IdHabitacion"
+                                    data-precio="@habitacion.Precio">
+
+                                Habitación @habitacion.Numero
+                                -
+                                @habitacion.Tipo
+                                -
+                                S/ @habitacion.Precio
+
+                            </option>
+                        }
+
+                    </select>
+
+                </div>
+
+
+                <!-- FECHA ENTRADA -->
+
+                <div class="mb-3">
+
+                    <label asp-for="FechaEntrada"
+                           class="form-label">
+
+                        Fecha de Entrada
+
+                    </label>
+
+                    <input asp-for="FechaEntrada"
+                           id="fechaEntrada"
+                           type="date"
+                           class="form-control" />
+
+                </div>
+
+
+                <!-- FECHA SALIDA -->
+
+                <div class="mb-3">
+
+                    <label asp-for="FechaSalida"
+                           class="form-label">
+
+                        Fecha de Salida
+
+                    </label>
+
+                    <input asp-for="FechaSalida"
+                           id="fechaSalida"
+                           type="date"
+                           class="form-control" />
+
+                </div>
+
+
+                <hr />
+
+
+                <!-- RESUMEN -->
+
+                <div class="card bg-light mb-3">
+
+                    <div class="card-body">
+
+                        <h5>
+                            Resumen
+                        </h5>
+
+                        <p>
+                            Precio por día:
+                            <strong>
+                                S/ <span id="precio">0.00</span>
+                            </strong>
+                        </p>
+
+                        <p>
+                            Cantidad de días:
+                            <strong>
+                                <span id="dias">0</span>
+                            </strong>
+                        </p>
+
+                        <h4>
+                            Total:
+                            S/ <span id="total">0.00</span>
+                        </h4>
+
+                    </div>
+
+                </div>
+
+
+                <button type="submit"
+                        class="btn btn-success">
+
+                    Registrar Reserva
+
+                </button>
+
+
+                <a asp-action="Index"
+                   class="btn btn-secondary">
+
+                    Cancelar
+
+                </a>
+
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+@section Scripts {
+
+    <script>
+
+        const habitacion =
+            document.getElementById("habitacion");
+
+        const fechaEntrada =
+            document.getElementById("fechaEntrada");
+
+        const fechaSalida =
+            document.getElementById("fechaSalida");
+
+
+        function calcularTotal() {
+
+            let opcion =
+                habitacion.options[
+                    habitacion.selectedIndex
+                ];
+
+
+            let precio =
+                parseFloat(
+                    opcion.getAttribute("data-precio")
+                ) || 0;
+
+
+            let entrada =
+                new Date(fechaEntrada.value);
+
+            let salida =
+                new Date(fechaSalida.value);
+
+
+            let dias = 0;
+
+
+            if (fechaEntrada.value &&
+                fechaSalida.value &&
+                salida > entrada) {
+
+                let diferencia =
+                    salida - entrada;
+
+                dias =
+                    diferencia /
+                    (1000 * 60 * 60 * 24);
+
+            }
+
+
+            let total =
+                precio * dias;
+
+
+            document.getElementById("precio")
+                .innerText =
+                precio.toFixed(2);
+
+
+            document.getElementById("dias")
+                .innerText =
+                dias;
+
+
+            document.getElementById("total")
+                .innerText =
+                total.toFixed(2);
+
+        }
+
+
+        habitacion.addEventListener(
+            "change",
+            calcularTotal
+        );
+
+        fechaEntrada.addEventListener(
+            "change",
+            calcularTotal
+        );
+
+        fechaSalida.addEventListener(
+            "change",
+            calcularTotal
+        );
+
+        calcularTotal();
+
+    </script>
+
+}

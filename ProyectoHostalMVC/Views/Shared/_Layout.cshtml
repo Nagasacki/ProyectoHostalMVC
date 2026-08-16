@@ -1,0 +1,169 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Hostal MVC</title>
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+</head>
+
+<body>
+
+    <!-- Barra de Navegeacion -->
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+
+            <div class="container">
+
+                <!-- Nombre del sistema -->
+                <a class="navbar-brand fw-bold"
+                   asp-controller="Home"
+                   asp-action="Index">
+                    HOSTAL VELAMOR
+                </a>
+
+                <!-- Boton para celulares -->
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarHostal"
+                        aria-controls="navbarHostal"
+                        aria-expanded="false"
+                        aria-label="Mostrar navegación">
+
+                    <span class="navbar-toggler-icon"></span>
+
+                </button>
+
+                <!-- Opciones del menú -->
+                <div class="collapse navbar-collapse"
+                     id="navbarHostal">
+
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+
+                        <!-- INICIO -->
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-controller="Home"
+                               asp-action="Index">
+
+                                Inicio
+
+                            </a>
+
+                        </li>
+                        <!-- HABITACIONES -->
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-controller="Habitaciones"
+                               asp-action="Index">
+
+                                Habitaciones
+
+                            </a>
+
+                        </li>
+
+
+                        <!-- CLIENTES -->
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-controller="Clientes"
+                               asp-action="Index">
+
+                                Clientes
+
+                            </a>
+
+                        </li>
+
+
+                        <!-- RESERVAS -->
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-controller="Reservas"
+                               asp-action="Index">
+
+                                Reservas
+
+                            </a>
+
+                        </li>
+
+
+                        <!-- REPORTES -->
+                        <li class="nav-item">
+
+                            <a class="nav-link"
+                               asp-controller="Reportes"
+                               asp-action="Index">
+
+                                Reportes
+
+                            </a>
+
+                        </li>
+
+                    </ul>
+
+
+                    <!-- Usuario -->
+                    <span class="navbar-text text-white">
+
+                        Administrador
+
+                    </span>
+
+                </div>
+
+            </div>
+
+        </nav>
+
+    </header>
+
+
+    <!-- CONTENIDO DE CADA VISTA -->
+    <main class="container mt-4 mb-5">
+
+        @RenderBody()
+
+    </main>
+
+
+    <!-- FOOTER -->
+    <footer class="border-top footer text-muted">
+
+        <div class="container py-3 text-center">
+
+            © 2026 - Sistema de Gestión de Hostal
+
+        </div>
+
+    </footer>
+
+
+    <!-- JAVASCRIPT -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script src="~/js/site.js"
+            asp-append-version="true"></script>
+
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

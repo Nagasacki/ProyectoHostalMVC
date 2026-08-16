@@ -1,0 +1,203 @@
+﻿@model ProyectoHostalMVC.Models.Reserva
+
+@{
+    ViewData["Title"] = "Detalle de Reserva";
+}
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-info text-white">
+            <h4 class="mb-0">
+                Detalle de Reserva
+            </h4>
+        </div>
+
+        <div class="card-body">
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>ID Reserva:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.IdReserva
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Cliente:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.NombreCliente
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Habitación:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.NumeroHabitacion
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Tipo:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.TipoHabitacion
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Fecha Entrada:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.FechaEntrada.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Fecha Salida:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.FechaSalida.ToString("dd/MM/yyyy")
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Cantidad de días:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.CantidadDias
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Precio por día:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    S/ @Model.PrecioDia.ToString("0.00")
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Total:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    <strong>
+                        S/ @Model.Total.ToString("0.00")
+                    </strong>
+                </div>
+            </div>
+
+
+            <div class="row mb-3">
+                <div class="col-md-4">
+                    <strong>Estado:</strong>
+                </div>
+
+                <div class="col-md-8">
+
+                    @if (Model.Estado == "Reservada")
+                    {
+                        <span class="badge bg-success">
+                            Reservada
+                        </span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">
+                            @Model.Estado
+                        </span>
+                    }
+
+                </div>
+            </div>
+
+
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <strong>Fecha de Registro:</strong>
+                </div>
+
+                <div class="col-md-8">
+                    @Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")
+                </div>
+            </div>
+            @if (Model.Estado == "Reservada")
+            {
+                <form asp-action="Finalizar"
+                      method="post"
+                      class="d-inline">
+
+                    <input type="hidden"
+                           name="id"
+                           value="@Model.IdReserva" />
+
+                    <button type="submit"
+                            class="btn btn-success">
+
+                        Finalizar Reserva
+
+                    </button>
+
+                </form>
+
+
+                <form asp-action="Cancelar"
+                      method="post"
+                      class="d-inline">
+
+                    <input type="hidden"
+                           name="id"
+                           value="@Model.IdReserva" />
+
+                    <button type="submit"
+                            class="btn btn-danger">
+
+                        Cancelar Reserva
+
+                    </button>
+
+                </form>
+            }
+
+
+            <a asp-action="Index"
+               class="btn btn-secondary">
+
+                Regresar
+
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
