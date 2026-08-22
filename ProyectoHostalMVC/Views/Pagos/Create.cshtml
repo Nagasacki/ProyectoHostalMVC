@@ -1,0 +1,31 @@
+@model ProyectoHostalMVC.Models.Pago
+@{
+    ViewData["Title"] = "Registrar pago";
+    decimal saldo = ViewBag.Saldo ?? 0m;
+}
+
+<div class="page-heading mb-4"><h1>Registrar pago</h1><p>@ViewBag.Reserva</p></div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card p-4">
+            <div class="summary-box d-flex justify-content-between align-items-center mb-4">
+                <span>Saldo pendiente</span><strong class="fs-4 text-danger">S/ @saldo.ToString("0.00")</strong>
+            </div>
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+                <input asp-for="IdReserva" type="hidden" />
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+                <div class="mb-3"><label asp-for="Monto" class="form-label"></label><input asp-for="Monto" class="form-control" max="@saldo" step="0.01" /><span asp-validation-for="Monto" class="text-danger small"></span></div>
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6"><label asp-for="Metodo" class="form-label"></label><select asp-for="Metodo" class="form-select"><option>Efectivo</option><option>Tarjeta</option><option>Yape</option><option>Plin</option><option>Transferencia</option></select></div>
+                    <div class="col-md-6"><label asp-for="Tipo" class="form-label"></label><select asp-for="Tipo" class="form-select"><option>Adelanto</option><option>Abono</option><option>Pago final</option></select></div>
+                </div>
+                <div class="mb-4"><label asp-for="NumeroOperacion" class="form-label"></label><input asp-for="NumeroOperacion" class="form-control" placeholder="Opcional para pagos digitales" /></div>
+                <div class="d-flex justify-content-end gap-2 border-top pt-3"><a asp-controller="Reservas" asp-action="Details" asp-route-id="@Model.IdReserva" class="btn btn-outline-secondary">Cancelar</a><button class="btn btn-primary">Guardar pago</button></div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

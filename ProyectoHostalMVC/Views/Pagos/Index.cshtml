@@ -1,0 +1,31 @@
+@model List<ProyectoHostalMVC.Models.Pago>
+@{
+    ViewData["Title"] = "Pagos";
+}
+
+<div class="page-heading mb-4"><h1>Pagos</h1><p>Historial de adelantos y pagos de las reservas.</p></div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>Fecha</th><th>Reserva</th><th>Huésped</th><th>Habitación</th><th>Tipo</th><th>Método</th><th>Operación</th><th class="text-end">Monto</th></tr></thead>
+            <tbody>
+                @if (Model.Any())
+                {
+                    foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.FechaPago.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td><a asp-controller="Reservas" asp-action="Details" asp-route-id="@p.IdReserva">#@p.IdReserva</a></td>
+                            <td class="fw-semibold">@p.NombreCliente</td>
+                            <td>Hab. @p.NumeroHabitacion</td>
+                            <td>@p.Tipo</td><td>@p.Metodo</td><td>@(p.NumeroOperacion ?? "—")</td>
+                            <td class="text-end fw-semibold">S/ @p.Monto.ToString("0.00")</td>
+                        </tr>
+                    }
+                }
+                else { <tr><td colspan="8" class="empty-row">No hay pagos registrados.</td></tr> }
+            </tbody>
+        </table>
+    </div>
+</div>

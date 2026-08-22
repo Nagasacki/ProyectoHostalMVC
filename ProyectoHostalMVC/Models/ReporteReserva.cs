@@ -19,6 +19,10 @@
 
         public decimal Total { get; set; }
 
+        public decimal MontoPagado { get; set; }
+
+        public decimal Saldo { get; set; }
+
         public string? Estado { get; set; }
     }
 }

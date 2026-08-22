@@ -1,122 +1,55 @@
-﻿@model IEnumerable<ProyectoHostalMVC.Models.Reserva>
-
+@model ProyectoHostalMVC.Models.PaginacionRespuesta<ProyectoHostalMVC.Models.Reserva>
 @{
     ViewData["Title"] = "Reservas";
 }
 
-<div class="container mt-4">
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1>Reservas</h1><p>Control de reservas, ingresos y salidas.</p></div>
+    <a asp-action="Create" class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> Nueva reserva</a>
+</div>
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+<div class="card p-3 mb-3">
+    <form asp-action="Index" method="get" class="row g-2">
+        <div class="col-md-10"><input name="busqueda" value="@Model.TerminoBusqueda" class="form-control" placeholder="Buscar por huésped, habitación o estado" /></div>
+        <div class="col-md-2 d-flex gap-2"><button class="btn btn-outline-secondary flex-grow-1">Buscar</button><a asp-action="Index" class="btn btn-outline-secondary"><i class="bi bi-x-lg"></i></a></div>
+    </form>
+</div>
 
-        <h2>Gestión de Reservas</h2>
-
-        <a asp-action="Create"
-           class="btn btn-primary">
-            + Nueva Reserva
-        </a>
-
-    </div>
-
-
-    <div class="card shadow-sm">
-
-        <div class="card-body">
-
-            <table class="table table-bordered table-hover">
-
-                <thead class="table-dark">
-
-                    <tr>
-                        <th>ID</th>
-                        <th>Cliente</th>
-                        <th>Habitación</th>
-                        <th>Tipo</th>
-                        <th>Entrada</th>
-                        <th>Salida</th>
-                        <th>Días</th>
-                        <th>Total</th>
-                        <th>Estado</th>
-                        <th>Acciones</th>
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    @foreach (var item in Model)
+<div class="card">
+    <div class="table-responsive">
+        <table class="table">
+            <thead><tr><th>Código</th><th>Huésped</th><th>Habitación</th><th>Estadía</th><th>Total</th><th>Pagado</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+                @if (Model.Items.Any())
+                {
+                    foreach (var item in Model.Items)
                     {
                         <tr>
-
-                            <td>
-                                @item.IdReserva
-                            </td>
-
-                            <td>
-                                @item.NombreCliente
-                            </td>
-
-                            <td>
-                                @item.NumeroHabitacion
-                            </td>
-
-                            <td>
-                                @item.TipoHabitacion
-                            </td>
-
-                            <td>
-                                @item.FechaEntrada.ToString("dd/MM/yyyy")
-                            </td>
-
-                            <td>
-                                @item.FechaSalida.ToString("dd/MM/yyyy")
-                            </td>
-
-                            <td>
-                                @item.CantidadDias
-                            </td>
-
-                            <td>
-                                S/ @item.Total.ToString("0.00")
-                            </td>
-
-                            <td>
-
-                                @if (item.Estado == "Reservada")
-                                {
-                                    <span class="badge bg-success">
-                                        Reservada
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-secondary">
-                                        @item.Estado
-                                    </span>
-                                }
-                                
-
-                            </td>
-
-                            <td>
-
-                                <a asp-action="Details"
-                                   asp-route-id="@item.IdReserva"
-                                   class="btn btn-info btn-sm">
-                                    Ver
-                                </a>
-
-                            </td>
-
+                            <td class="text-muted">#@item.IdReserva</td>
+                            <td class="fw-semibold">@item.NombreCliente</td>
+                            <td>Hab. @item.NumeroHabitacion <small class="text-muted d-block">@item.TipoHabitacion</small></td>
+                            <td>@item.FechaEntrada.ToString("dd/MM/yyyy") <span class="text-muted">—</span> @item.FechaSalida.ToString("dd/MM/yyyy")<small class="text-muted d-block">@item.CantidadDias noche(s)</small></td>
+                            <td>S/ @item.Total.ToString("0.00")</td>
+                            <td>S/ @item.MontoPagado.ToString("0.00")<small class="text-danger d-block">Saldo S/ @item.Saldo.ToString("0.00")</small></td>
+                            <td><span class="status status-@item.Estado.ToLower().Replace(" ", "-")">@item.Estado</span></td>
+                            <td class="text-end"><a asp-action="Details" asp-route-id="@item.IdReserva" class="btn btn-sm btn-outline-secondary">Gestionar</a></td>
                         </tr>
                     }
-
-                </tbody>
-
-            </table>
-
-        </div>
-
+                }
+                else { <tr><td colspan="8" class="empty-row">No se encontraron reservas.</td></tr> }
+            </tbody>
+        </table>
     </div>
-
+    @if (Model.TotalPaginas > 1)
+    {
+        <div class="card-footer d-flex justify-content-between align-items-center">
+            <small class="text-muted">Página @Model.PaginaActual de @Model.TotalPaginas</small>
+            <ul class="pagination pagination-sm mb-0">
+                @for (int i = 1; i <= Model.TotalPaginas; i++)
+                {
+                    <li class="page-item @(i == Model.PaginaActual ? "active" : "")"><a class="page-link" asp-route-pagina="@i" asp-route-busqueda="@Model.TerminoBusqueda">@i</a></li>
+                }
+            </ul>
+        </div>
+    }
 </div>

@@ -1,169 +1,92 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <title>@ViewData["Title"] - Hostal MVC</title>
-
-    <link rel="stylesheet"
-          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-
-    <link rel="stylesheet"
-          href="~/css/site.css"
-          asp-append-version="true" />
+    <title>@ViewData["Title"] - Hostal Velamor</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
-
-<body>
-
-    <!-- Barra de Navegeacion -->
-    <header>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-
-            <div class="container">
-
-                <!-- Nombre del sistema -->
-                <a class="navbar-brand fw-bold"
-                   asp-controller="Home"
-                   asp-action="Index">
-                    HOSTAL VELAMOR
+<body class="d-flex flex-column min-vh-100">
+    <header class="app-header">
+        <nav class="navbar navbar-expand-lg navbar-light bg-white py-2">
+            <div class="container-fluid app-container">
+                <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
+                    <img src="~/images/logo-velamor.png" class="brand-logo" alt="Logo Hostal Velamor" />
+                    <span>HOSTAL VELAMOR</span>
                 </a>
 
-                <!-- Boton para celulares -->
-                <button class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarHostal"
-                        aria-controls="navbarHostal"
-                        aria-expanded="false"
-                        aria-label="Mostrar navegación">
-
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#menuPrincipal">
                     <span class="navbar-toggler-icon"></span>
-
                 </button>
 
-                <!-- Opciones del menú -->
-                <div class="collapse navbar-collapse"
-                     id="navbarHostal">
+                <div class="collapse navbar-collapse" id="menuPrincipal">
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <ul class="navbar-nav mx-auto gap-lg-2">
+                            <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door"></i> Inicio</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Habitaciones" asp-action="Index"><i class="bi bi-door-open"></i> Habitaciones</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Clientes" asp-action="Index"><i class="bi bi-people"></i> Huéspedes</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Reservas" asp-action="Index"><i class="bi bi-calendar-check"></i> Reservas</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Pagos" asp-action="Index"><i class="bi bi-credit-card"></i> Pagos</a></li>
+                            @if (User.IsInRole("Administrador"))
+                            {
+                                <li class="nav-item"><a class="nav-link" asp-controller="Reportes" asp-action="Index"><i class="bi bi-bar-chart"></i> Reportes</a></li>
+                            }
+                        </ul>
 
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                        <!-- INICIO -->
-                        <li class="nav-item">
-
-                            <a class="nav-link"
-                               asp-controller="Home"
-                               asp-action="Index">
-
-                                Inicio
-
-                            </a>
-
-                        </li>
-                        <!-- HABITACIONES -->
-                        <li class="nav-item">
-
-                            <a class="nav-link"
-                               asp-controller="Habitaciones"
-                               asp-action="Index">
-
-                                Habitaciones
-
-                            </a>
-
-                        </li>
-
-
-                        <!-- CLIENTES -->
-                        <li class="nav-item">
-
-                            <a class="nav-link"
-                               asp-controller="Clientes"
-                               asp-action="Index">
-
-                                Clientes
-
-                            </a>
-
-                        </li>
-
-
-                        <!-- RESERVAS -->
-                        <li class="nav-item">
-
-                            <a class="nav-link"
-                               asp-controller="Reservas"
-                               asp-action="Index">
-
-                                Reservas
-
-                            </a>
-
-                        </li>
-
-
-                        <!-- REPORTES -->
-                        <li class="nav-item">
-
-                            <a class="nav-link"
-                               asp-controller="Reportes"
-                               asp-action="Index">
-
-                                Reportes
-
-                            </a>
-
-                        </li>
-
-                    </ul>
-
-
-                    <!-- Usuario -->
-                    <span class="navbar-text text-white">
-
-                        Administrador
-
-                    </span>
-
+                        <div class="dropdown user-menu">
+                            <button class="btn btn-light btn-sm dropdown-toggle" data-bs-toggle="dropdown">
+                                <span class="user-avatar">@(User.Identity.Name?.Substring(0, 1).ToUpper())</span>
+                                <span class="d-none d-xl-inline">@User.Identity.Name</span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><span class="dropdown-item-text small text-muted">@(User.IsInRole("Administrador") ? "Administrador" : "Recepción")</span></li>
+                                <li><hr class="dropdown-divider" /></li>
+                                <li>
+                                    <form asp-controller="Account" asp-action="Logout" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <button class="dropdown-item text-danger" type="submit">Cerrar sesión</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </div>
+                    }
                 </div>
-
             </div>
-
         </nav>
-
     </header>
 
-
-    <!-- CONTENIDO DE CADA VISTA -->
-    <main class="container mt-4 mb-5">
-
+    <main class="app-container container-fluid py-4 flex-grow-1">
         @RenderBody()
-
     </main>
 
-
-    <!-- FOOTER -->
-    <footer class="border-top footer text-muted">
-
-        <div class="container py-3 text-center">
-
-            © 2026 - Sistema de Gestión de Hostal
-
+    <footer class="border-top py-3 mt-auto">
+        <div class="app-container container-fluid d-flex justify-content-between small text-muted">
+            <span>Hostal Velamor · Gestión hotelera</span>
+            <span>2026</span>
         </div>
-
     </footer>
 
-
-    <!-- JAVASCRIPT -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
-
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <script src="~/js/site.js"
-            asp-append-version="true"></script>
-
-
+    @if (TempData["SweetAlert_Title"] != null)
+    {
+        <script>
+            Swal.fire({
+                title: '@TempData["SweetAlert_Title"]',
+                text: '@TempData["SweetAlert_Text"]',
+                icon: '@(TempData["SweetAlert_Type"] ?? "info")',
+                confirmButtonColor: '#123b3a',
+                confirmButtonText: 'Aceptar'
+            });
+        </script>
+    }
     @await RenderSectionAsync("Scripts", required: false)
-
 </body>
 </html>

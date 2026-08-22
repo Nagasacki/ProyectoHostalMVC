@@ -1,294 +1,168 @@
-﻿@model ProyectoHostalMVC.Models.Reserva
-
+@model ProyectoHostalMVC.Models.Reserva
+@using ProyectoHostalMVC.Models
 @{
-    ViewData["Title"] = "Nueva Reserva";
+    ViewData["Title"] = "Nueva reserva";
+    var clientes = ViewBag.Clientes as List<Cliente> ?? new();
+    var habitaciones = ViewBag.Habitaciones as List<Habitacion> ?? new();
 }
 
-<div class="container mt-4">
-
-    <div class="card shadow">
-
-        <div class="card-header bg-primary text-white">
-
-            <h4 class="mb-0">
-                Nueva Reserva
-            </h4>
-
-        </div>
-
-
-        <div class="card-body">
-
-            @if (ViewBag.Error != null)
-            {
-                <div class="alert alert-danger">
-
-                    @ViewBag.Error
-
-                </div>
-            }
-
-
-            <form asp-action="Create"
-                  method="post">
-
-
-                <!-- CLIENTE -->
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Cliente
-                    </label>
-
-                    <select asp-for="IdCliente"
-                            class="form-select"
-                            required>
-
-                        <option value="">
-                            Seleccione un cliente
-                        </option>
-
-                        @foreach (var cliente in ViewBag.Clientes)
-                        {
-                            <option value="@cliente.IdCliente">
-
-                                @cliente.Nombre
-
-                            </option>
-                        }
-
-                    </select>
-
-                </div>
-
-
-                <!-- HABITACIÓN -->
-
-                <div class="mb-3">
-
-                    <label class="form-label">
-                        Habitación
-                    </label>
-
-                    <select asp-for="IdHabitacion"
-                            id="habitacion"
-                            class="form-select"
-                            required>
-
-                        <option value="">
-                            Seleccione una habitación
-                        </option>
-
-                        @foreach (var habitacion in ViewBag.Habitaciones)
-                        {
-                            <option value="@habitacion.IdHabitacion"
-                                    data-precio="@habitacion.Precio">
-
-                                Habitación @habitacion.Numero
-                                -
-                                @habitacion.Tipo
-                                -
-                                S/ @habitacion.Precio
-
-                            </option>
-                        }
-
-                    </select>
-
-                </div>
-
-
-                <!-- FECHA ENTRADA -->
-
-                <div class="mb-3">
-
-                    <label asp-for="FechaEntrada"
-                           class="form-label">
-
-                        Fecha de Entrada
-
-                    </label>
-
-                    <input asp-for="FechaEntrada"
-                           id="fechaEntrada"
-                           type="date"
-                           class="form-control" />
-
-                </div>
-
-
-                <!-- FECHA SALIDA -->
-
-                <div class="mb-3">
-
-                    <label asp-for="FechaSalida"
-                           class="form-label">
-
-                        Fecha de Salida
-
-                    </label>
-
-                    <input asp-for="FechaSalida"
-                           id="fechaSalida"
-                           type="date"
-                           class="form-control" />
-
-                </div>
-
-
-                <hr />
-
-
-                <!-- RESUMEN -->
-
-                <div class="card bg-light mb-3">
-
-                    <div class="card-body">
-
-                        <h5>
-                            Resumen
-                        </h5>
-
-                        <p>
-                            Precio por día:
-                            <strong>
-                                S/ <span id="precio">0.00</span>
-                            </strong>
-                        </p>
-
-                        <p>
-                            Cantidad de días:
-                            <strong>
-                                <span id="dias">0</span>
-                            </strong>
-                        </p>
-
-                        <h4>
-                            Total:
-                            S/ <span id="total">0.00</span>
-                        </h4>
-
-                    </div>
-
-                </div>
-
-
-                <button type="submit"
-                        class="btn btn-success">
-
-                    Registrar Reserva
-
-                </button>
-
-
-                <a asp-action="Index"
-                   class="btn btn-secondary">
-
-                    Cancelar
-
-                </a>
-
-
-            </form>
-
-        </div>
-
-    </div>
-
+<div class="page-heading mb-4">
+    <h1>Nueva reserva</h1>
+    <p>Consulta fechas, selecciona al huésped y confirma la habitación.</p>
 </div>
 
+<form asp-action="Create" method="post" class="row g-4">
+    @Html.AntiForgeryToken()
+    <div class="col-lg-8">
+        <div class="card p-4">
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+
+            <h2 class="form-section-title">1. Fechas de estadía</h2>
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <label asp-for="FechaEntrada" class="form-label"></label>
+                    <input asp-for="FechaEntrada" class="form-control" id="fechaEntrada" min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="FechaEntrada" class="text-danger small"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="FechaSalida" class="form-label"></label>
+                    <input asp-for="FechaSalida" class="form-control" id="fechaSalida" min="@DateTime.Today.AddDays(1).ToString("yyyy-MM-dd")" />
+                    <span asp-validation-for="FechaSalida" class="text-danger small"></span>
+                </div>
+                <div class="col-12"><div id="disponibilidadMensaje" class="small text-muted">La disponibilidad se actualiza al cambiar las fechas.</div></div>
+            </div>
+
+            <h2 class="form-section-title">2. Huésped</h2>
+            <div class="row g-3 mb-4">
+                <div class="col-md-7">
+                    <label asp-for="IdCliente" class="form-label">Huésped registrado</label>
+                    <select asp-for="IdCliente" class="form-select" id="selectCliente">
+                        <option value="">Seleccione un huésped</option>
+                        @foreach (var c in clientes)
+                        {
+                            <option value="@c.IdCliente">@c.Nombre · @c.Dni</option>
+                        }
+                    </select>
+                    <span asp-validation-for="IdCliente" class="text-danger small"></span>
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label">Buscar por documento (AJAX)</label>
+                    <div class="input-group">
+                        <input id="txtDocumento" class="form-control" maxlength="15" placeholder="DNI o documento" />
+                        <button id="btnBuscarCliente" type="button" class="btn btn-outline-secondary">Buscar</button>
+                    </div>
+                    <div id="clienteMensaje" class="small mt-1 text-muted"></div>
+                </div>
+            </div>
+
+            <h2 class="form-section-title">3. Habitación disponible</h2>
+            <div class="mb-2">
+                <label asp-for="IdHabitacion" class="form-label"></label>
+                <select asp-for="IdHabitacion" class="form-select" id="selectHabitacion">
+                    <option value="">Seleccione una habitación</option>
+                    @foreach (var h in habitaciones)
+                    {
+                        <option value="@h.IdHabitacion" data-precio="@h.Precio.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+                            Hab. @h.Numero · @h.Tipo · S/ @h.Precio.ToString("0.00")
+                        </option>
+                    }
+                </select>
+                <span asp-validation-for="IdHabitacion" class="text-danger small"></span>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 pt-4 mt-4 border-top">
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Confirmar reserva</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <aside class="summary-box position-sticky" style="top: 92px;">
+            <h2 class="h6 fw-bold mb-3">Resumen</h2>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Tarifa por noche</span><strong>S/ <span id="precioNoche">0.00</span></strong></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span class="text-muted">Noches</span><strong id="cantidadNoches">0</strong></div>
+            <div class="d-flex justify-content-between pt-3"><span class="fw-semibold">Total estimado</span><strong class="fs-5 text-success">S/ <span id="totalReserva">0.00</span></strong></div>
+            <p class="small text-muted mt-3 mb-0">La reserva queda confirmada. La habitación solo se marcará ocupada al realizar el check-in.</p>
+        </aside>
+    </div>
+</form>
 
 @section Scripts {
-
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script>
+        const entrada = document.getElementById('fechaEntrada');
+        const salida = document.getElementById('fechaSalida');
+        const habitacion = document.getElementById('selectHabitacion');
+        const mensajeDisponibilidad = document.getElementById('disponibilidadMensaje');
 
-        const habitacion =
-            document.getElementById("habitacion");
-
-        const fechaEntrada =
-            document.getElementById("fechaEntrada");
-
-        const fechaSalida =
-            document.getElementById("fechaSalida");
-
-
-        function calcularTotal() {
-
-            let opcion =
-                habitacion.options[
-                    habitacion.selectedIndex
-                ];
-
-
-            let precio =
-                parseFloat(
-                    opcion.getAttribute("data-precio")
-                ) || 0;
-
-
-            let entrada =
-                new Date(fechaEntrada.value);
-
-            let salida =
-                new Date(fechaSalida.value);
-
-
-            let dias = 0;
-
-
-            if (fechaEntrada.value &&
-                fechaSalida.value &&
-                salida > entrada) {
-
-                let diferencia =
-                    salida - entrada;
-
-                dias =
-                    diferencia /
-                    (1000 * 60 * 60 * 24);
-
-            }
-
-
-            let total =
-                precio * dias;
-
-
-            document.getElementById("precio")
-                .innerText =
-                precio.toFixed(2);
-
-
-            document.getElementById("dias")
-                .innerText =
-                dias;
-
-
-            document.getElementById("total")
-                .innerText =
-                total.toFixed(2);
-
+        function calcular() {
+            const opcion = habitacion.options[habitacion.selectedIndex];
+            const precio = parseFloat(opcion?.dataset.precio || '0');
+            const fecha1 = new Date(entrada.value + 'T00:00:00');
+            const fecha2 = new Date(salida.value + 'T00:00:00');
+            const noches = salida.value && entrada.value && fecha2 > fecha1 ? Math.round((fecha2 - fecha1) / 86400000) : 0;
+            document.getElementById('precioNoche').textContent = precio.toFixed(2);
+            document.getElementById('cantidadNoches').textContent = noches;
+            document.getElementById('totalReserva').textContent = (precio * noches).toFixed(2);
         }
 
+        async function cargarDisponibles() {
+            if (!entrada.value || !salida.value || salida.value <= entrada.value) {
+                mensajeDisponibilidad.textContent = 'Seleccione un rango de fechas válido.';
+                habitacion.innerHTML = '<option value="">Seleccione una habitación</option>';
+                calcular();
+                return;
+            }
 
-        habitacion.addEventListener(
-            "change",
-            calcularTotal
-        );
+            mensajeDisponibilidad.textContent = 'Consultando disponibilidad...';
+            try {
+                const url = `/Reservas/HabitacionesDisponiblesJson?fechaEntrada=${entrada.value}&fechaSalida=${salida.value}`;
+                const respuesta = await fetch(url);
+                const resultado = await respuesta.json();
+                habitacion.innerHTML = '<option value="">Seleccione una habitación</option>';
 
-        fechaEntrada.addEventListener(
-            "change",
-            calcularTotal
-        );
+                if (resultado.success) {
+                    resultado.data.forEach(h => {
+                        const opcion = document.createElement('option');
+                        opcion.value = h.idHabitacion;
+                        opcion.dataset.precio = h.precio;
+                        opcion.textContent = `Hab. ${h.numero} · ${h.tipo} · S/ ${Number(h.precio).toFixed(2)}`;
+                        habitacion.appendChild(opcion);
+                    });
+                    mensajeDisponibilidad.textContent = `${resultado.data.length} habitación(es) disponible(s).`;
+                } else {
+                    mensajeDisponibilidad.textContent = resultado.message;
+                }
+            } catch {
+                mensajeDisponibilidad.textContent = 'No se pudo consultar la disponibilidad.';
+            }
+            calcular();
+        }
 
-        fechaSalida.addEventListener(
-            "change",
-            calcularTotal
-        );
+        async function buscarCliente() {
+            const documento = document.getElementById('txtDocumento').value.trim();
+            const mensaje = document.getElementById('clienteMensaje');
+            if (documento.length < 8) { mensaje.textContent = 'Ingrese al menos 8 caracteres.'; return; }
+            mensaje.textContent = 'Buscando...';
+            try {
+                const respuesta = await fetch(`/Clientes/BuscarPorDniJson?dni=${encodeURIComponent(documento)}`);
+                const resultado = await respuesta.json();
+                if (resultado.success) {
+                    document.getElementById('selectCliente').value = resultado.data.idCliente;
+                    mensaje.textContent = `Huésped encontrado: ${resultado.data.nombre}`;
+                    mensaje.className = 'small mt-1 text-success';
+                } else {
+                    mensaje.textContent = resultado.message;
+                    mensaje.className = 'small mt-1 text-danger';
+                }
+            } catch { mensaje.textContent = 'No se pudo realizar la búsqueda.'; }
+        }
 
-        calcularTotal();
-
+        entrada.addEventListener('change', cargarDisponibles);
+        salida.addEventListener('change', cargarDisponibles);
+        habitacion.addEventListener('change', calcular);
+        document.getElementById('btnBuscarCliente').addEventListener('click', buscarCliente);
+        calcular();
     </script>
-
 }

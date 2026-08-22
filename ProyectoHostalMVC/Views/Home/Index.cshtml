@@ -1,174 +1,109 @@
-﻿@model ProyectoHostalMVC.Models.Dashboard
-
+@model ProyectoHostalMVC.Models.Dashboard
 @{
-    ViewData["Title"] = "Inicio";
+    ViewData["Title"] = "Operación de hoy";
 }
 
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <h1>Operación de hoy</h1>
+        <p>@DateTime.Today.ToString("dddd, dd 'de' MMMM 'de' yyyy")</p>
+    </div>
+    <a asp-controller="Reservas" asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-1"></i> Nueva reserva
+    </a>
+</div>
 
-<div class="container mt-4">
+<div class="row g-3 mb-4 metric-row">
+    <div class="col-6 col-lg-3">
+        <a asp-controller="Reservas" asp-action="Index" asp-route-busqueda="Confirmada" class="metric-card">
+            <span class="metric-icon success"><i class="bi bi-box-arrow-in-right"></i></span>
+            <span><small>Llegadas</small><strong>@Model.LlegadasHoy</strong></span>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a asp-controller="Reservas" asp-action="Index" asp-route-busqueda="Hospedado" class="metric-card">
+            <span class="metric-icon info"><i class="bi bi-box-arrow-right"></i></span>
+            <span><small>Salidas</small><strong>@Model.SalidasHoy</strong></span>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a asp-controller="Reservas" asp-action="Index" asp-route-busqueda="Hospedado" class="metric-card">
+            <span class="metric-icon purple"><i class="bi bi-moon-stars"></i></span>
+            <span><small>Hospedados</small><strong>@Model.HuespedesAlojados</strong></span>
+        </a>
+    </div>
+    <div class="col-6 col-lg-3">
+        <a asp-controller="Habitaciones" asp-action="Index" asp-route-busqueda="Limpieza" class="metric-card">
+            <span class="metric-icon warning"><i class="bi bi-stars"></i></span>
+            <span><small>Por limpiar</small><strong>@Model.HabitacionesLimpieza</strong></span>
+        </a>
+    </div>
+</div>
 
-    <div class="mb-4">
-
-        <h2>
-            Dashboard
-        </h2>
-
-        <p class="text-muted">
-            Sistema de Gestión - Hostal Velamor
-        </p>
-
+<div class="row g-4">
+    <div class="col-lg-8">
+        <section class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h2>Movimientos de hoy</h2>
+                <a asp-controller="Reservas" asp-action="Index" class="small-link">Ver reservas</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead><tr><th>Tipo</th><th>Huésped</th><th>Habitación</th><th>Estado</th><th></th></tr></thead>
+                    <tbody>
+                        @if (Model.MovimientosHoy.Any())
+                        {
+                            foreach (var item in Model.MovimientosHoy)
+                            {
+                                <tr>
+                                    <td><span class="movement-icon @(item.Tipo == "Llegada" ? "arrival" : "departure")"><i class="bi @(item.Tipo == "Llegada" ? "bi-arrow-down" : "bi-arrow-up")"></i></span> @item.Tipo</td>
+                                    <td class="fw-semibold">@item.Huesped</td>
+                                    <td>Hab. @item.Habitacion</td>
+                                    <td><span class="status status-@item.Estado.ToLower().Replace(" ", "-")">@item.Estado</span></td>
+                                    <td class="text-end"><a asp-controller="Reservas" asp-action="Details" asp-route-id="@item.IdReserva" class="btn btn-sm btn-outline-secondary">Ver</a></td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr><td colspan="5" class="empty-row">No hay llegadas ni salidas programadas para hoy.</td></tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </section>
     </div>
 
-
-    <div class="row g-4">
-
-        <!-- TOTAL HABITACIONES -->
-
-        <div class="col-md-4">
-
-            <div class="card shadow-sm border-primary">
-
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Habitaciones
-                    </h5>
-
-                    <h1 class="text-primary">
-                        @Model.TotalHabitaciones
-                    </h1>
-
-                    <a asp-controller="Habitaciones"
-                       asp-action="Index"
-                       class="btn btn-primary btn-sm">
-
-                        Ver habitaciones
-
-                    </a>
-
-                </div>
-
+    <div class="col-lg-4">
+        <section class="card mb-4">
+            <div class="card-header"><h2>Estado de habitaciones</h2></div>
+            <div class="card-body state-list">
+                <div><span><i class="state-dot available"></i>Disponibles</span><strong>@Model.HabitacionesDisponibles</strong></div>
+                <div><span><i class="state-dot occupied"></i>Ocupadas</span><strong>@Model.HabitacionesOcupadas</strong></div>
+                <div><span><i class="state-dot cleaning"></i>Por limpiar</span><strong>@Model.HabitacionesLimpieza</strong></div>
+                <div><span><i class="state-dot maintenance"></i>Mantenimiento</span><strong>@Model.HabitacionesMantenimiento</strong></div>
+                <div class="state-total"><span>Total</span><strong>@Model.TotalHabitaciones</strong></div>
             </div>
+        </section>
 
-        </div>
-
-
-        <!-- DISPONIBLES -->
-
-        <div class="col-md-4">
-
-            <div class="card shadow-sm border-success">
-
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Disponibles
-                    </h5>
-
-                    <h1 class="text-success">
-                        @Model.HabitacionesDisponibles
-                    </h1>
-
-                    <p class="text-muted mb-0">
-                        Habitaciones disponibles
-                    </p>
-
-                </div>
-
+        <section class="card">
+            <div class="card-header d-flex justify-content-between"><h2>Pagos pendientes</h2><span class="text-muted small">Hoy: S/ @Model.CobradoHoy.ToString("0.00")</span></div>
+            <div class="list-group list-group-flush">
+                @if (Model.PagosPendientes.Any())
+                {
+                    foreach (var pago in Model.PagosPendientes)
+                    {
+                        <a asp-controller="Reservas" asp-action="Details" asp-route-id="@pago.IdReserva" class="list-group-item list-group-item-action payment-row">
+                            <span><strong>@pago.Huesped</strong><small>Hab. @pago.Habitacion</small></span>
+                            <b>S/ @pago.Saldo.ToString("0.00")</b>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="empty-row">No hay saldos pendientes.</div>
+                }
             </div>
-
-        </div>
-
-
-        <!-- OCUPADAS -->
-
-        <div class="col-md-4">
-
-            <div class="card shadow-sm border-danger">
-
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Ocupadas
-                    </h5>
-
-                    <h1 class="text-danger">
-                        @Model.HabitacionesOcupadas
-                    </h1>
-
-                    <p class="text-muted mb-0">
-                        Habitaciones ocupadas
-                    </p>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- CLIENTES -->
-
-        <div class="col-md-6">
-
-            <div class="card shadow-sm border-info">
-
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Clientes
-                    </h5>
-
-                    <h1 class="text-info">
-                        @Model.TotalClientes
-                    </h1>
-
-                    <a asp-controller="Clientes"
-                       asp-action="Index"
-                       class="btn btn-info btn-sm">
-
-                        Ver clientes
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <!-- RESERVAS -->
-
-        <div class="col-md-6">
-
-            <div class="card shadow-sm border-warning">
-
-                <div class="card-body">
-
-                    <h5 class="card-title">
-                        Reservas Activas
-                    </h5>
-
-                    <h1 class="text-warning">
-                        @Model.ReservasActivas
-                    </h1>
-
-                    <a asp-controller="Reservas"
-                       asp-action="Index"
-                       class="btn btn-warning btn-sm">
-
-                        Ver reservas
-
-                    </a>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
+        </section>
     </div>
-
 </div>

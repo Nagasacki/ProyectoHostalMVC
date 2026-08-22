@@ -1,0 +1,18 @@
+@model ProyectoHostalMVC.Models.Cliente
+<div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
+<h2 class="form-section-title">Identificación</h2>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><label asp-for="TipoDocumento" class="form-label"></label><select asp-for="TipoDocumento" class="form-select"><option>DNI</option><option>Pasaporte</option><option>Carné de extranjería</option></select></div>
+    <div class="col-md-4"><label asp-for="Dni" class="form-label"></label><input asp-for="Dni" class="form-control" maxlength="15" /><span asp-validation-for="Dni" class="text-danger small"></span></div>
+    <div class="col-md-4"><label asp-for="Nacionalidad" class="form-label"></label><input asp-for="Nacionalidad" class="form-control" /></div>
+    <div class="col-md-8"><label asp-for="Nombre" class="form-label"></label><input asp-for="Nombre" class="form-control" /><span asp-validation-for="Nombre" class="text-danger small"></span></div>
+    <div class="col-md-4"><label asp-for="FechaNacimiento" class="form-label"></label><input asp-for="FechaNacimiento" class="form-control" /></div>
+</div>
+<h2 class="form-section-title">Contacto</h2>
+<div class="row g-3">
+    <div class="col-md-4"><label asp-for="Telefono" class="form-label"></label><input asp-for="Telefono" class="form-control" /><span asp-validation-for="Telefono" class="text-danger small"></span></div>
+    <div class="col-md-8"><label asp-for="Correo" class="form-label"></label><input asp-for="Correo" class="form-control" /><span asp-validation-for="Correo" class="text-danger small"></span></div>
+    <div class="col-md-8"><label asp-for="Direccion" class="form-label"></label><input asp-for="Direccion" class="form-control" /></div>
+    <div class="col-md-4"><label asp-for="ContactoEmergencia" class="form-label"></label><input asp-for="ContactoEmergencia" class="form-control" /></div>
+    <div class="col-12"><label asp-for="Observaciones" class="form-label"></label><textarea asp-for="Observaciones" class="form-control" rows="2"></textarea></div>
+</div>

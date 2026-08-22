@@ -9,5 +9,9 @@
         public int ReservasCanceladas { get; set; }
 
         public decimal TotalIngresos { get; set; }
+
+        public decimal TotalFacturado { get; set; }
+
+        public decimal SaldoPendiente { get; set; }
     }
 }

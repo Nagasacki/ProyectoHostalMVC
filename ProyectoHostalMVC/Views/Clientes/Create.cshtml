@@ -1,95 +1,11 @@
-﻿@model ProyectoHostalMVC.Models.Cliente
-
-@{
-    ViewData["Title"] = "Nuevo Cliente";
-}
-
-<div class="container mt-4">
-
-    <div class="card shadow">
-
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">Registrar Cliente</h4>
-        </div>
-
-        <div class="card-body">
-
-            <form asp-action="Create" method="post">
-
-                <div class="mb-3">
-
-                    <label asp-for="Dni"
-                           class="form-label">
-                        DNI
-                    </label>
-
-                    <input asp-for="Dni"
-                           class="form-control"
-                           maxlength="8"
-                           placeholder="Ejemplo: 76543210" />
-
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label asp-for="Nombre"
-                           class="form-label">
-                        Nombre completo
-                    </label>
-
-                    <input asp-for="Nombre"
-                           class="form-control"
-                           placeholder="Ejemplo: Carlos Mendoza" />
-
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label asp-for="Telefono"
-                           class="form-label">
-                        Teléfono
-                    </label>
-
-                    <input asp-for="Telefono"
-                           class="form-control"
-                           maxlength="15"
-                           placeholder="Ejemplo: 987654321" />
-
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label asp-for="Correo"
-                           class="form-label">
-                        Correo
-                    </label>
-
-                    <input asp-for="Correo"
-                           class="form-control"
-                           type="email"
-                           placeholder="Ejemplo: cliente@gmail.com" />
-
-                </div>
-
-
-                <button type="submit"
-                        class="btn btn-success">
-                    Guardar
-                </button>
-
-
-                <a asp-action="Index"
-                   class="btn btn-secondary">
-                    Cancelar
-                </a>
-
-            </form>
-
-        </div>
-
-    </div>
-
+@model ProyectoHostalMVC.Models.Cliente
+@{ ViewData["Title"] = "Nuevo huésped"; }
+<div class="page-heading mb-4"><h1>Nuevo huésped</h1><p>Datos básicos para reservas y contacto.</p></div>
+<div class="card p-4 mx-auto" style="max-width:850px;">
+    <form asp-action="Create" method="post">
+        @Html.AntiForgeryToken()
+        <partial name="_Formulario" model="Model" />
+        <div class="d-flex justify-content-end gap-2 pt-4 mt-4 border-top"><a asp-action="Index" class="btn btn-outline-secondary">Cancelar</a><button class="btn btn-primary">Guardar huésped</button></div>
+    </form>
 </div>
+@section Scripts { @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); } }

@@ -1,90 +1,106 @@
-﻿@model IEnumerable<ProyectoHostalMVC.Models.Cliente>
+﻿@model ProyectoHostalMVC.Models.PaginacionRespuesta<ProyectoHostalMVC.Models.Cliente>
 
 @{
-    ViewData["Title"] = "Clientes";
+    ViewData["Title"] = "Huéspedes";
 }
 
-<div class="container mt-4">
-
-    <div class="d-flex justify-content-between align-items-center mb-4">
-
-        <h2>Gestión de Clientes</h2>
-
-        <a asp-action="Create"
-           class="btn btn-primary">
-
-            + Nuevo Cliente
-
-        </a>
-
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 pb-3 border-bottom">
+    <div>
+        <h4 class="fw-bold text-dark mb-0">Huéspedes</h4>
+        <span class="text-muted small">Directorio de huéspedes registrados</span>
     </div>
+    <a asp-action="Create" class="btn btn-primary btn-sm">
+        + Nuevo Huésped
+    </a>
+</div>
 
-    <div class="card shadow-sm">
+<!-- BUSCADOR -->
+<div class="card p-3 mb-3">
+    <form asp-action="Index" method="get" class="row g-2 align-items-center">
+        <div class="col-md-9 col-lg-10">
+            <input type="text" name="busqueda" value="@Model.TerminoBusqueda" class="form-control form-control-sm" placeholder="Buscar por DNI, Nombre o Correo..." />
+        </div>
+        <div class="col-md-3 col-lg-2 d-flex gap-2">
+            <button type="submit" class="btn btn-outline-dark btn-sm w-100">Buscar</button>
+            @if (!string.IsNullOrWhiteSpace(Model.TerminoBusqueda))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Limpiar</a>
+            }
+        </div>
+    </form>
+</div>
 
-        <div class="card-body">
-
-            <table class="table table-bordered table-hover">
-
-                <thead class="table-dark">
-
-                    <tr>
-                        <th>ID</th>
-                        <th>DNI</th>
-                        <th>Nombre</th>
-                        <th>Teléfono</th>
-                        <th>Correo</th>
-                        <th>Acciones</th>
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    @foreach (var item in Model)
+<!-- TABLA -->
+<div class="card">
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th class="ps-3">ID</th>
+                    <th>Documento</th>
+                    <th>Nombre</th>
+                    <th>Teléfono</th>
+                    <th>Correo</th>
+                    <th class="text-end pe-3">Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Items.Any())
+                {
+                    @foreach (var item in Model.Items)
                     {
                         <tr>
-
-                            <td>@item.IdCliente</td>
-
-                            <td>@item.Dni</td>
-
-                            <td>@item.Nombre</td>
-
-                            <td>@item.Telefono</td>
-
-                            <td>@item.Correo</td>
-
-                            <td>
-
-                                <a asp-action="Edit"
-                                   asp-route-id="@item.IdCliente"
-                                   class="btn btn-warning btn-sm">
-                                    Editar
-                                </a>
-
-                                <a asp-action="Details"
-                                   asp-route-id="@item.IdCliente"
-                                   class="btn btn-info btn-sm">
-                                    Ver
-                                </a>
-
-                                <a asp-action="Delete"
-                                   asp-route-id="@item.IdCliente"
-                                   class="btn btn-danger btn-sm">
-                                    Eliminar
-                                </a>
-
+                            <td class="ps-3 text-muted">#@item.IdCliente</td>
+                            <td><small class="text-muted d-block">@item.TipoDocumento</small><span class="font-monospace">@item.Dni</span></td>
+                            <td class="fw-medium text-dark">@item.Nombre</td>
+                            <td class="text-secondary">@item.Telefono</td>
+                            <td class="text-secondary">@item.Correo</td>
+                            <td class="text-end pe-3">
+                                <a asp-action="Details" asp-route-id="@item.IdCliente" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Detalle">Ver</a>
+                                <a asp-action="Edit" asp-route-id="@item.IdCliente" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Editar">Editar</a>
+                                @if (User.IsInRole("Administrador"))
+                                {
+                                    <a asp-action="Delete" asp-route-id="@item.IdCliente" class="btn btn-outline-secondary text-danger btn-sm py-0 px-2" title="Eliminar">Eliminar</a>
+                                }
                             </td>
-
                         </tr>
                     }
-
-                </tbody>
-
-            </table>
-
-        </div>
-
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-muted small">
+                            No se encontraron clientes registrados.
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
     </div>
 
+    <!-- PAGINACIÓN -->
+    @if (Model.TotalPaginas > 1)
+    {
+        <div class="card-footer d-flex justify-content-between align-items-center py-2 px-3">
+            <small class="text-muted">
+                Página @Model.PaginaActual de @Model.TotalPaginas (@Model.TotalRegistros registros)
+            </small>
+            <nav aria-label="Navegacion">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(!Model.TienePaginaAnterior ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual - 1)" asp-route-busqueda="@Model.TerminoBusqueda">&laquo;</a>
+                    </li>
+                    @for (int i = 1; i <= Model.TotalPaginas; i++)
+                    {
+                        <li class="page-item @(i == Model.PaginaActual ? "active" : "")">
+                            <a class="page-link" asp-action="Index" asp-route-pagina="@i" asp-route-busqueda="@Model.TerminoBusqueda">@i</a>
+                        </li>
+                    }
+                    <li class="page-item @(!Model.TienePaginaSiguiente ? "disabled" : "")">
+                        <a class="page-link" asp-action="Index" asp-route-pagina="@(Model.PaginaActual + 1)" asp-route-busqueda="@Model.TerminoBusqueda">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
 </div>

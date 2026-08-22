@@ -1,203 +1,81 @@
-﻿@model ProyectoHostalMVC.Models.Reserva
-
+@model ProyectoHostalMVC.Models.ReservaDetalleViewModel
 @{
-    ViewData["Title"] = "Detalle de Reserva";
+    var r = Model.Reserva;
+    ViewData["Title"] = "Reserva #" + r.IdReserva;
 }
 
-<div class="container mt-4">
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
+    <div><h1>Reserva #@r.IdReserva.ToString("D5")</h1><p>@r.NombreCliente · Habitación @r.NumeroHabitacion</p></div>
+    <span class="status status-@r.Estado.ToLower().Replace(" ", "-")">@r.Estado</span>
+</div>
 
-    <div class="card shadow">
-
-        <div class="card-header bg-info text-white">
-            <h4 class="mb-0">
-                Detalle de Reserva
-            </h4>
-        </div>
-
-        <div class="card-body">
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>ID Reserva:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.IdReserva
+<div class="row g-4">
+    <div class="col-lg-8">
+        <section class="card mb-4">
+            <div class="card-header"><h2>Datos de la estadía</h2></div>
+            <div class="card-body">
+                <div class="row g-4">
+                    <div class="col-sm-6 col-md-3"><small class="text-muted d-block">Entrada prevista</small><strong>@r.FechaEntrada.ToString("dd/MM/yyyy")</strong></div>
+                    <div class="col-sm-6 col-md-3"><small class="text-muted d-block">Salida prevista</small><strong>@r.FechaSalida.ToString("dd/MM/yyyy")</strong></div>
+                    <div class="col-sm-6 col-md-3"><small class="text-muted d-block">Check-in real</small><strong>@(r.FechaCheckInReal?.ToString("dd/MM/yyyy HH:mm") ?? "Pendiente")</strong></div>
+                    <div class="col-sm-6 col-md-3"><small class="text-muted d-block">Check-out real</small><strong>@(r.FechaCheckOutReal?.ToString("dd/MM/yyyy HH:mm") ?? "Pendiente")</strong></div>
                 </div>
             </div>
+        </section>
 
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Cliente:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.NombreCliente
-                </div>
+        <section class="card">
+            <div class="card-header d-flex justify-content-between align-items-center"><h2>Historial de pagos</h2>@if (r.Estado is "Confirmada" or "Hospedado" && r.Saldo > 0) { <a asp-controller="Pagos" asp-action="Create" asp-route-idReserva="@r.IdReserva" class="btn btn-sm btn-primary">Registrar pago</a> }</div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Fecha</th><th>Tipo</th><th>Método</th><th>Operación</th><th class="text-end">Monto</th></tr></thead>
+                    <tbody>
+                        @if (Model.Pagos.Any())
+                        {
+                            foreach (var p in Model.Pagos)
+                            {
+                                <tr><td>@p.FechaPago.ToString("dd/MM/yyyy HH:mm")</td><td>@p.Tipo</td><td>@p.Metodo</td><td>@(p.NumeroOperacion ?? "—")</td><td class="text-end fw-semibold">S/ @p.Monto.ToString("0.00")</td></tr>
+                            }
+                        }
+                        else { <tr><td colspan="5" class="empty-row">Todavía no se registraron pagos.</td></tr> }
+                    </tbody>
+                </table>
             </div>
+        </section>
+    </div>
 
+    <div class="col-lg-4">
+        <aside class="card p-4 mb-4">
+            <h2 class="h6 fw-bold mb-3">Resumen de cuenta</h2>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span>Tarifa</span><span>S/ @r.PrecioDia.ToString("0.00") × @r.CantidadDias</span></div>
+            <div class="d-flex justify-content-between py-2 border-bottom"><span>Total</span><strong>S/ @r.Total.ToString("0.00")</strong></div>
+            <div class="d-flex justify-content-between py-2 border-bottom text-success"><span>Pagado</span><strong>S/ @r.MontoPagado.ToString("0.00")</strong></div>
+            <div class="d-flex justify-content-between pt-3 fs-5"><span>Saldo</span><strong class="@(r.Saldo > 0 ? "text-danger" : "text-success")">S/ @r.Saldo.ToString("0.00")</strong></div>
+        </aside>
 
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Habitación:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.NumeroHabitacion
-                </div>
-            </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Tipo:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.TipoHabitacion
-                </div>
-            </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Fecha Entrada:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.FechaEntrada.ToString("dd/MM/yyyy")
-                </div>
-            </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Fecha Salida:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.FechaSalida.ToString("dd/MM/yyyy")
-                </div>
-            </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Cantidad de días:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.CantidadDias
-                </div>
-            </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Precio por día:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    S/ @Model.PrecioDia.ToString("0.00")
-                </div>
-            </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Total:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    <strong>
-                        S/ @Model.Total.ToString("0.00")
-                    </strong>
-                </div>
-            </div>
-
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Estado:</strong>
-                </div>
-
-                <div class="col-md-8">
-
-                    @if (Model.Estado == "Reservada")
+        <aside class="card p-4">
+            <h2 class="h6 fw-bold mb-3">Acciones</h2>
+            <div class="d-grid gap-2">
+                @if (r.Estado == "Confirmada")
+                {
+                    <form asp-action="CheckIn" asp-route-id="@r.IdReserva" method="post">@Html.AntiForgeryToken()<button class="btn btn-primary w-100">Realizar check-in</button></form>
+                    <form asp-action="NoPresentado" asp-route-id="@r.IdReserva" method="post">@Html.AntiForgeryToken()<button class="btn btn-outline-secondary w-100">Marcar no presentado</button></form>
+                    <form asp-action="Cancelar" asp-route-id="@r.IdReserva" method="post">@Html.AntiForgeryToken()<button class="btn btn-outline-danger w-100">Cancelar reserva</button></form>
+                }
+                else if (r.Estado == "Hospedado")
+                {
+                    @if (r.Saldo == 0)
                     {
-                        <span class="badge bg-success">
-                            Reservada
-                        </span>
+                        <form asp-action="CheckOut" asp-route-id="@r.IdReserva" method="post">@Html.AntiForgeryToken()<button class="btn btn-primary w-100">Realizar check-out</button></form>
                     }
                     else
                     {
-                        <span class="badge bg-secondary">
-                            @Model.Estado
-                        </span>
+                        <a asp-controller="Pagos" asp-action="Create" asp-route-idReserva="@r.IdReserva" class="btn btn-primary">Pagar saldo para check-out</a>
+                        <small class="text-muted text-center">El check-out se habilita al completar el pago.</small>
                     }
-
-                </div>
+                }
+                <button type="button" onclick="window.print()" class="btn btn-outline-secondary">Imprimir comprobante</button>
+                <a asp-action="Index" class="btn btn-outline-secondary">Volver a reservas</a>
             </div>
-
-
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <strong>Fecha de Registro:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.FechaRegistro.ToString("dd/MM/yyyy HH:mm")
-                </div>
-            </div>
-            @if (Model.Estado == "Reservada")
-            {
-                <form asp-action="Finalizar"
-                      method="post"
-                      class="d-inline">
-
-                    <input type="hidden"
-                           name="id"
-                           value="@Model.IdReserva" />
-
-                    <button type="submit"
-                            class="btn btn-success">
-
-                        Finalizar Reserva
-
-                    </button>
-
-                </form>
-
-
-                <form asp-action="Cancelar"
-                      method="post"
-                      class="d-inline">
-
-                    <input type="hidden"
-                           name="id"
-                           value="@Model.IdReserva" />
-
-                    <button type="submit"
-                            class="btn btn-danger">
-
-                        Cancelar Reserva
-
-                    </button>
-
-                </form>
-            }
-
-
-            <a asp-action="Index"
-               class="btn btn-secondary">
-
-                Regresar
-
-            </a>
-
-        </div>
-
+        </aside>
     </div>
-
 </div>

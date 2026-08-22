@@ -4,125 +4,56 @@
     ViewData["Title"] = "Nueva Habitación";
 }
 
-<div class="container mt-4">
+<div class="container py-2" style="max-width: 550px;">
+    <div class="card p-4">
+        <h5 class="fw-bold text-dark mb-3">Registrar Habitación</h5>
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small"></div>
 
-    <div class="card shadow">
+            <div class="mb-3">
+                <label asp-for="Numero" class="form-label"></label>
+                <input asp-for="Numero" class="form-control" placeholder="Ej: 101, 201" />
+                <span asp-validation-for="Numero" class="text-danger small"></span>
+            </div>
 
-        <div class="card-header bg-primary text-white">
-            <h4>Nueva Habitación</h4>
-        </div>
+            <div class="mb-3">
+                <label asp-for="Tipo" class="form-label"></label>
+                <select asp-for="Tipo" class="form-select">
+                    <option value="Simple">Simple</option>
+                    <option value="Matrimonial">Matrimonial</option>
+                    <option value="Doble">Doble</option>
+                    <option value="Suite">Suite</option>
+                    <option value="Suite Presidencial">Suite Presidencial</option>
+                </select>
+                <span asp-validation-for="Tipo" class="text-danger small"></span>
+            </div>
 
-        <div class="card-body">
+            <div class="mb-3">
+                <label asp-for="Precio" class="form-label"></label>
+                <input asp-for="Precio" type="number" step="0.50" class="form-control" placeholder="60.00" />
+                <span asp-validation-for="Precio" class="text-danger small"></span>
+            </div>
 
-            <form asp-action="Create" method="post">
+            <div class="mb-3">
+                <label asp-for="Estado" class="form-label"></label>
+                <select asp-for="Estado" class="form-select">
+                    <option value="Disponible">Disponible</option>
+                    <option value="Mantenimiento">Mantenimiento</option>
+                    <option value="Fuera de servicio">Fuera de servicio</option>
+                </select>
+                <div class="form-text">El estado Ocupada se asigna automáticamente al hacer check-in.</div>
+                <span asp-validation-for="Estado" class="text-danger small"></span>
+            </div>
 
-                <div class="mb-3">
-
-                    <label asp-for="Numero"
-                           class="form-label">
-                        Número de Habitación
-                    </label>
-
-                    <input asp-for="Numero"
-                           class="form-control"
-                           placeholder="Ejemplo: 106" />
-
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label asp-for="Tipo"
-                           class="form-label">
-                        Tipo
-                    </label>
-
-                    <select asp-for="Tipo"
-                            class="form-select">
-
-                        <option value="">
-                            Seleccione un tipo
-                        </option>
-
-                        <option value="Simple">
-                            Simple
-                        </option>
-
-                        <option value="Matrimonial">
-                            Matrimonial
-                        </option>
-
-                        <option value="Premium">
-                            Premium
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label asp-for="Precio"
-                           class="form-label">
-                        Precio
-                    </label>
-
-                    <input asp-for="Precio"
-                           class="form-control"
-                           type="number"
-                           step="0.01"
-                           placeholder="0.00" />
-
-                </div>
-
-
-                <div class="mb-3">
-
-                    <label asp-for="Estado"
-                           class="form-label">
-                        Estado
-                    </label>
-
-                    <select asp-for="Estado"
-                            class="form-select">
-
-                        <option value="Disponible">
-                            Disponible
-                        </option>
-
-                        <option value="Ocupada">
-                            Ocupada
-                        </option>
-
-                        <option value="Mantenimiento">
-                            Mantenimiento
-                        </option>
-
-                    </select>
-
-                </div>
-
-
-                <button type="submit"
-                        class="btn btn-success">
-
-                    Guardar
-
-                </button>
-
-
-                <a asp-action="Index"
-                   class="btn btn-secondary">
-
-                    Cancelar
-
-                </a>
-
-            </form>
-
-        </div>
-
+            <div class="d-flex justify-content-end gap-2 pt-3 border-top mt-4">
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+                <button type="submit" class="btn btn-primary">Guardar</button>
+            </div>
+        </form>
     </div>
-
 </div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

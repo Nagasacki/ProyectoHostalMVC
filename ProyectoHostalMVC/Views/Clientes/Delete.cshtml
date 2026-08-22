@@ -4,92 +4,22 @@
     ViewData["Title"] = "Eliminar Cliente";
 }
 
-<div class="container mt-4">
+<div class="container py-2" style="max-width: 500px;">
+    <div class="card p-4 border-danger">
+        <h5 class="fw-bold text-danger mb-2">Confirmar Eliminación</h5>
+        <p class="text-secondary small mb-3">¿Está seguro de que desea eliminar a este cliente? Esta acción no se puede deshacer.</p>
 
-    <div class="card shadow">
-
-        <div class="card-header bg-danger text-white">
-            <h4 class="mb-0">
-                Eliminar Cliente
-            </h4>
+        <div class="p-3 bg-light rounded mb-3 small">
+            <div><strong>Nombre:</strong> @Model.Nombre</div>
+            <div><strong>DNI:</strong> @Model.Dni</div>
+            <div><strong>Correo:</strong> @Model.Correo</div>
         </div>
 
-        <div class="card-body">
-
-            <div class="alert alert-warning">
-                ¿Está seguro que desea eliminar este cliente?
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>ID:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.IdCliente
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>DNI:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.Dni
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Nombre:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.Nombre
-                </div>
-            </div>
-
-            <div class="row mb-3">
-                <div class="col-md-4">
-                    <strong>Teléfono:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.Telefono
-                </div>
-            </div>
-
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <strong>Correo:</strong>
-                </div>
-
-                <div class="col-md-8">
-                    @Model.Correo
-                </div>
-            </div>
-
-            <form asp-action="Delete" method="post">
-
-                <input type="hidden"
-                       name="id"
-                       value="@Model.IdCliente" />
-
-                <button type="submit"
-                        class="btn btn-danger">
-                    Eliminar
-                </button>
-
-                <a asp-action="Index"
-                   class="btn btn-secondary">
-                    Cancelar
-                </a>
-
-            </form>
-
-        </div>
-
+        <form asp-action="Delete" method="post" class="d-flex justify-content-end gap-2 pt-2 border-top">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="IdCliente" />
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-danger">Eliminar</button>
+        </form>
     </div>
-
 </div>

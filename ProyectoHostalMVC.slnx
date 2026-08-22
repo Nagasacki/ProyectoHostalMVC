@@ -1,3 +1,7 @@
-<Solution>
+﻿<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="ProyectoHostalMVC/Database/HOSTALVELAMOR.sql" />
+    <File Path="INFORME_PROYECTO_CIBERTEC.md" />
+  </Folder>
   <Project Path="ProyectoHostalMVC/ProyectoHostalMVC.csproj" />
 </Solution>

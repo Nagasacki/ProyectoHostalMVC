@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using ProyectoHostalMVC.Models;
 using System.Data;
 
 namespace ProyectoHostalMVC.Controllers
 {
+    [Authorize]
     public class ReservasController : Controller
     {
         private readonly IConfiguration _config;
@@ -15,402 +16,252 @@ namespace ProyectoHostalMVC.Controllers
             _config = config;
         }
 
-
-        // LISTAR RESERVAS
-        public IActionResult Index()
+        public IActionResult Index(int pagina = 1, string? busqueda = null)
         {
-            List<Reserva> lista = new List<Reserva>();
+            List<Reserva> lista = new();
+            using SqlConnection cn = new(_config["ConnectionStrings:cn"]);
+            SqlCommand cmd = new("dbo.sp_ListarReservas", cn) { CommandType = CommandType.StoredProcedure };
+            cn.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read()) lista.Add(MapearReserva(dr));
 
-            using (SqlConnection cn =
-                new SqlConnection(_config["ConnectionStrings:cn"]))
+            if (!string.IsNullOrWhiteSpace(busqueda))
             {
-                SqlCommand cmd =
-                    new SqlCommand("dbo.sp_ListarReservas", cn);
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cn.Open();
-
-                using (SqlDataReader dr = cmd.ExecuteReader())
-                {
-                    while (dr.Read())
-                    {
-                        Reserva reserva = new Reserva();
-
-                        reserva.IdReserva =
-                            Convert.ToInt32(dr["IdReserva"]);
-
-                        reserva.IdCliente =
-                            Convert.ToInt32(dr["IdCliente"]);
-
-                        reserva.NombreCliente =
-                            dr["NombreCliente"].ToString();
-
-                        reserva.IdHabitacion =
-                            Convert.ToInt32(dr["IdHabitacion"]);
-
-                        reserva.NumeroHabitacion =
-                            dr["NumeroHabitacion"].ToString();
-
-                        reserva.TipoHabitacion =
-                            dr["TipoHabitacion"].ToString();
-
-                        reserva.FechaEntrada =
-                            Convert.ToDateTime(dr["FechaEntrada"]);
-
-                        reserva.FechaSalida =
-                            Convert.ToDateTime(dr["FechaSalida"]);
-
-                        reserva.CantidadDias =
-                            Convert.ToInt32(dr["CantidadDias"]);
-
-                        reserva.PrecioDia =
-                            Convert.ToDecimal(dr["PrecioDia"]);
-
-                        reserva.Total =
-                            Convert.ToDecimal(dr["Total"]);
-
-                        reserva.Estado =
-                            dr["Estado"].ToString();
-
-                        reserva.FechaRegistro =
-                            Convert.ToDateTime(dr["FechaRegistro"]);
-
-                        lista.Add(reserva);
-                    }
-                }
+                lista = lista.Where(r =>
+                    (r.NombreCliente?.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    (r.NumeroHabitacion?.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                    r.Estado.Contains(busqueda, StringComparison.OrdinalIgnoreCase)).ToList();
             }
 
-            return View(lista);
+            return View(PaginacionRespuesta<Reserva>.Crear(lista, pagina, 6, busqueda));
         }
-        private void CargarCombos()
-        {
-            List<Cliente> clientes = new List<Cliente>();
-            List<Habitacion> habitaciones = new List<Habitacion>();
 
-            using (SqlConnection cn =
-                new SqlConnection(_config["ConnectionStrings:cn"]))
-            {
-                cn.Open();
-
-                // ==============================
-                // LISTAR CLIENTES
-                // ==============================
-
-                SqlCommand cmdClientes =
-                    new SqlCommand("dbo.sp_ListarClientes", cn);
-
-                cmdClientes.CommandType = CommandType.StoredProcedure;
-
-                using (SqlDataReader dr = cmdClientes.ExecuteReader())
-                {
-                    while (dr.Read())
-                    {
-                        Cliente cliente = new Cliente();
-
-                        cliente.IdCliente =
-                            Convert.ToInt32(dr["IdCliente"]);
-
-                        cliente.Nombre =
-                            dr["Nombre"].ToString();
-
-                        clientes.Add(cliente);
-                    }
-                }
-
-
-                // ==============================
-                // HABITACIONES DISPONIBLES
-                // ==============================
-
-                SqlCommand cmdHabitaciones =
-                    new SqlCommand(
-                        "dbo.sp_ListarHabitacionesDisponibles",
-                        cn);
-
-                cmdHabitaciones.CommandType =
-                    CommandType.StoredProcedure;
-
-                using (SqlDataReader dr =
-                    cmdHabitaciones.ExecuteReader())
-                {
-                    while (dr.Read())
-                    {
-                        Habitacion habitacion =
-                            new Habitacion();
-
-                        habitacion.IdHabitacion =
-                            Convert.ToInt32(
-                                dr["IdHabitacion"]);
-
-                        habitacion.Numero =
-                            dr["Numero"].ToString();
-
-                        habitacion.Tipo =
-                            dr["Tipo"].ToString();
-
-                        habitacion.Precio =
-                            Convert.ToDecimal(
-                                dr["Precio"]);
-
-                        habitaciones.Add(habitacion);
-                    }
-                }
-            }
-
-            ViewBag.Clientes = clientes;
-            ViewBag.Habitaciones = habitaciones;
-        }
         [HttpGet]
         public IActionResult Create()
         {
-            CargarCombos();
-
-            Reserva reserva = new Reserva();
-
-            reserva.FechaEntrada = DateTime.Today;
-            reserva.FechaSalida = DateTime.Today.AddDays(1);
-
+            Reserva reserva = new()
+            {
+                FechaEntrada = DateTime.Today,
+                FechaSalida = DateTime.Today.AddDays(1)
+            };
+            CargarDatosFormulario(reserva.FechaEntrada, reserva.FechaSalida);
             return View(reserva);
         }
+
+        [HttpGet]
+        public IActionResult HabitacionesDisponiblesJson(DateTime fechaEntrada, DateTime fechaSalida)
+        {
+            if (fechaSalida <= fechaEntrada)
+                return Json(new { success = false, message = "La salida debe ser posterior a la entrada." });
+
+            var habitaciones = ObtenerHabitacionesDisponibles(fechaEntrada, fechaSalida)
+                .Select(h => new { h.IdHabitacion, h.Numero, h.Tipo, h.Precio });
+            return Json(new { success = true, data = habitaciones });
+        }
+
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Create(Reserva reserva)
         {
-            // ==============================
-            // VALIDAR FECHAS
-            // ==============================
-
             if (reserva.FechaSalida <= reserva.FechaEntrada)
+                ModelState.AddModelError("FechaSalida", "La fecha de salida debe ser posterior a la fecha de entrada.");
+
+            if (!ModelState.IsValid)
             {
-                ViewBag.Error =
-                    "La fecha de salida debe ser mayor a la fecha de entrada.";
-
-                CargarCombos();
-
+                CargarDatosFormulario(reserva.FechaEntrada, reserva.FechaSalida);
                 return View(reserva);
             }
 
-
-            decimal precioHabitacion = 0;
-
-
-            using (SqlConnection cn =
-                new SqlConnection(_config["ConnectionStrings:cn"]))
+            try
             {
+                using SqlConnection cn = new(_config["ConnectionStrings:cn"]);
                 cn.Open();
+                decimal precio = ObtenerPrecioHabitacion(cn, reserva.IdHabitacion);
+                int dias = (reserva.FechaSalida.Date - reserva.FechaEntrada.Date).Days;
 
-
-                // ==============================
-                // OBTENER PRECIO HABITACIÓN
-                // ==============================
-
-                SqlCommand cmdPrecio =
-                    new SqlCommand(
-                        "dbo.sp_BuscarHabitacion",
-                        cn);
-
-                cmdPrecio.CommandType =
-                    CommandType.StoredProcedure;
-
-                cmdPrecio.Parameters.AddWithValue(
-                    "@IdHabitacion",
-                    reserva.IdHabitacion);
-
-
-                using (SqlDataReader dr =
-                    cmdPrecio.ExecuteReader())
-                {
-                    if (dr.Read())
-                    {
-                        precioHabitacion =
-                            Convert.ToDecimal(
-                                dr["Precio"]);
-                    }
-                    else
-                    {
-                        ViewBag.Error =
-                            "No se encontró la habitación.";
-
-                        CargarCombos();
-
-                        return View(reserva);
-                    }
-                }
-
-
-                // ==============================
-                // CALCULAR DÍAS
-                // ==============================
-
-                int cantidadDias =
-                    (reserva.FechaSalida -
-                     reserva.FechaEntrada).Days;
-
-
-                // ==============================
-                // CALCULAR TOTAL
-                // ==============================
-
-                decimal total =
-                    cantidadDias * precioHabitacion;
-
-
-                // ==============================
-                // REGISTRAR RESERVA
-                // ==============================
-
-                SqlCommand cmd =
-                    new SqlCommand(
-                        "dbo.sp_RegistrarReserva",
-                        cn);
-
-                cmd.CommandType =
-                    CommandType.StoredProcedure;
-
-
-                cmd.Parameters.AddWithValue(
-                    "@IdCliente",
-                    reserva.IdCliente);
-
-                cmd.Parameters.AddWithValue(
-                    "@IdHabitacion",
-                    reserva.IdHabitacion);
-
-                cmd.Parameters.AddWithValue(
-                    "@FechaEntrada",
-                    reserva.FechaEntrada);
-
-                cmd.Parameters.AddWithValue(
-                    "@FechaSalida",
-                    reserva.FechaSalida);
-
-                cmd.Parameters.AddWithValue(
-                    "@CantidadDias",
-                    cantidadDias);
-
-                cmd.Parameters.AddWithValue(
-                    "@PrecioDia",
-                    precioHabitacion);
-
-                cmd.Parameters.AddWithValue(
-                    "@Total",
-                    total);
-
-
+                SqlCommand cmd = new("dbo.sp_RegistrarReserva", cn) { CommandType = CommandType.StoredProcedure };
+                cmd.Parameters.AddWithValue("@IdCliente", reserva.IdCliente);
+                cmd.Parameters.AddWithValue("@IdHabitacion", reserva.IdHabitacion);
+                cmd.Parameters.AddWithValue("@FechaEntrada", reserva.FechaEntrada.Date);
+                cmd.Parameters.AddWithValue("@FechaSalida", reserva.FechaSalida.Date);
+                cmd.Parameters.AddWithValue("@CantidadDias", dias);
+                cmd.Parameters.AddWithValue("@PrecioDia", precio);
+                cmd.Parameters.AddWithValue("@Total", dias * precio);
                 cmd.ExecuteNonQuery();
+
+                MostrarMensaje("Reserva confirmada", "La habitación quedó separada para las fechas elegidas.", "success");
+                return RedirectToAction("Index");
             }
-
-
-            return RedirectToAction("Index");
+            catch (Exception ex) when (ex is SqlException || ex is InvalidOperationException)
+            {
+                ModelState.AddModelError(string.Empty, ex.Message);
+                CargarDatosFormulario(reserva.FechaEntrada, reserva.FechaSalida);
+                return View(reserva);
+            }
         }
+
         [HttpGet]
         public IActionResult Details(int id)
         {
-            Reserva reserva = new Reserva();
+            Reserva? reserva = ObtenerReserva(id);
+            if (reserva == null) return NotFound();
+            return View(new ReservaDetalleViewModel { Reserva = reserva, Pagos = ObtenerPagos(id) });
+        }
 
-            using (SqlConnection cn =
-                new SqlConnection(_config["ConnectionStrings:cn"]))
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CheckIn(int id) => EjecutarAccion("dbo.sp_CheckInReserva", id,
+            "Check-in registrado", "El huésped ingresó y la habitación está ocupada.");
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult CheckOut(int id) => EjecutarAccion("dbo.sp_CheckOutReserva", id,
+            "Check-out registrado", "La habitación quedó pendiente de limpieza.");
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Cancelar(int id) => EjecutarAccion("dbo.sp_CancelarReserva", id,
+            "Reserva cancelada", "La habitación volvió a quedar libre para esas fechas.");
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult NoPresentado(int id) => EjecutarAccion("dbo.sp_NoPresentadoReserva", id,
+            "No presentado", "La reserva fue cerrada por inasistencia.");
+
+        private IActionResult EjecutarAccion(string procedimiento, int id, string titulo, string texto)
+        {
+            try
             {
-                SqlCommand cmd =
-                    new SqlCommand("dbo.sp_BuscarReserva", cn);
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
+                using SqlConnection cn = new(_config["ConnectionStrings:cn"]);
+                SqlCommand cmd = new(procedimiento, cn) { CommandType = CommandType.StoredProcedure };
                 cmd.Parameters.AddWithValue("@IdReserva", id);
-
                 cn.Open();
+                cmd.ExecuteNonQuery();
+                MostrarMensaje(titulo, texto, "success");
+            }
+            catch (SqlException ex)
+            {
+                MostrarMensaje("No se pudo completar", ex.Message, "error");
+            }
+            return RedirectToAction("Details", new { id });
+        }
 
-                using (SqlDataReader dr = cmd.ExecuteReader())
+        private void CargarDatosFormulario(DateTime entrada, DateTime salida)
+        {
+            List<Cliente> clientes = new();
+            using (SqlConnection cn = new(_config["ConnectionStrings:cn"]))
+            {
+                SqlCommand cmd = new("dbo.sp_ListarClientes", cn) { CommandType = CommandType.StoredProcedure };
+                cn.Open();
+                using SqlDataReader dr = cmd.ExecuteReader();
+                while (dr.Read())
                 {
-                    if (dr.Read())
+                    clientes.Add(new Cliente
                     {
-                        reserva.IdReserva =
-                            Convert.ToInt32(dr["IdReserva"]);
-
-                        reserva.IdCliente =
-                            Convert.ToInt32(dr["IdCliente"]);
-
-                        reserva.NombreCliente =
-                            dr["NombreCliente"].ToString();
-
-                        reserva.IdHabitacion =
-                            Convert.ToInt32(dr["IdHabitacion"]);
-
-                        reserva.NumeroHabitacion =
-                            dr["NumeroHabitacion"].ToString();
-
-                        reserva.TipoHabitacion =
-                            dr["TipoHabitacion"].ToString();
-
-                        reserva.FechaEntrada =
-                            Convert.ToDateTime(dr["FechaEntrada"]);
-
-                        reserva.FechaSalida =
-                            Convert.ToDateTime(dr["FechaSalida"]);
-
-                        reserva.CantidadDias =
-                            Convert.ToInt32(dr["CantidadDias"]);
-
-                        reserva.PrecioDia =
-                            Convert.ToDecimal(dr["PrecioDia"]);
-
-                        reserva.Total =
-                            Convert.ToDecimal(dr["Total"]);
-
-                        reserva.Estado =
-                            dr["Estado"].ToString();
-
-                        reserva.FechaRegistro =
-                            Convert.ToDateTime(dr["FechaRegistro"]);
-                    }
-                    else
-                    {
-                        return NotFound();
-                    }
+                        IdCliente = Convert.ToInt32(dr["IdCliente"]),
+                        Dni = dr["Dni"].ToString() ?? string.Empty,
+                        Nombre = dr["Nombre"].ToString() ?? string.Empty
+                    });
                 }
             }
-
-            return View(reserva);
+            ViewBag.Clientes = clientes;
+            ViewBag.Habitaciones = salida > entrada ? ObtenerHabitacionesDisponibles(entrada, salida) : new List<Habitacion>();
         }
-        [HttpPost]
-        public IActionResult Finalizar(int id)
+
+        private List<Habitacion> ObtenerHabitacionesDisponibles(DateTime entrada, DateTime salida)
         {
-            using (SqlConnection cn =
-                new SqlConnection(_config["ConnectionStrings:cn"]))
+            List<Habitacion> lista = new();
+            using SqlConnection cn = new(_config["ConnectionStrings:cn"]);
+            SqlCommand cmd = new("dbo.sp_ListarHabitacionesDisponiblesPorFechas", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@FechaEntrada", entrada.Date);
+            cmd.Parameters.AddWithValue("@FechaSalida", salida.Date);
+            cn.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
             {
-                SqlCommand cmd =
-                    new SqlCommand("dbo.sp_FinalizarReserva", cn);
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@IdReserva", id);
-
-                cn.Open();
-
-                cmd.ExecuteNonQuery();
+                lista.Add(new Habitacion
+                {
+                    IdHabitacion = Convert.ToInt32(dr["IdHabitacion"]),
+                    Numero = dr["Numero"].ToString() ?? string.Empty,
+                    Tipo = dr["Tipo"].ToString() ?? string.Empty,
+                    Precio = Convert.ToDecimal(dr["Precio"]),
+                    Estado = dr["Estado"].ToString() ?? string.Empty
+                });
             }
-
-            return RedirectToAction("Index");
+            return lista;
         }
-        [HttpPost]
-        public IActionResult Cancelar(int id)
+
+        private static decimal ObtenerPrecioHabitacion(SqlConnection cn, int idHabitacion)
         {
-            using (SqlConnection cn =
-                new SqlConnection(_config["ConnectionStrings:cn"]))
+            SqlCommand cmd = new("dbo.sp_BuscarHabitacion", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@IdHabitacion", idHabitacion);
+            using SqlDataReader dr = cmd.ExecuteReader();
+            if (dr.Read()) return Convert.ToDecimal(dr["Precio"]);
+            throw new InvalidOperationException("No se encontró la habitación seleccionada.");
+        }
+
+        private Reserva? ObtenerReserva(int id)
+        {
+            using SqlConnection cn = new(_config["ConnectionStrings:cn"]);
+            SqlCommand cmd = new("dbo.sp_BuscarReserva", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@IdReserva", id);
+            cn.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+            return dr.Read() ? MapearReserva(dr) : null;
+        }
+
+        private List<Pago> ObtenerPagos(int idReserva)
+        {
+            List<Pago> lista = new();
+            using SqlConnection cn = new(_config["ConnectionStrings:cn"]);
+            SqlCommand cmd = new("dbo.sp_ListarPagos", cn) { CommandType = CommandType.StoredProcedure };
+            cmd.Parameters.AddWithValue("@IdReserva", idReserva);
+            cn.Open();
+            using SqlDataReader dr = cmd.ExecuteReader();
+            while (dr.Read())
             {
-                SqlCommand cmd =
-                    new SqlCommand("dbo.sp_CancelarReserva", cn);
-
-                cmd.CommandType = CommandType.StoredProcedure;
-
-                cmd.Parameters.AddWithValue("@IdReserva", id);
-
-                cn.Open();
-
-                cmd.ExecuteNonQuery();
+                lista.Add(new Pago
+                {
+                    IdPago = Convert.ToInt32(dr["IdPago"]),
+                    IdReserva = Convert.ToInt32(dr["IdReserva"]),
+                    FechaPago = Convert.ToDateTime(dr["FechaPago"]),
+                    Monto = Convert.ToDecimal(dr["Monto"]),
+                    Metodo = dr["Metodo"].ToString() ?? string.Empty,
+                    Tipo = dr["Tipo"].ToString() ?? string.Empty,
+                    NumeroOperacion = dr["NumeroOperacion"]?.ToString()
+                });
             }
+            return lista;
+        }
 
-            return RedirectToAction("Index");
+        private static Reserva MapearReserva(SqlDataReader dr)
+        {
+            return new Reserva
+            {
+                IdReserva = Convert.ToInt32(dr["IdReserva"]),
+                IdCliente = Convert.ToInt32(dr["IdCliente"]),
+                NombreCliente = dr["NombreCliente"].ToString(),
+                IdHabitacion = Convert.ToInt32(dr["IdHabitacion"]),
+                NumeroHabitacion = dr["NumeroHabitacion"].ToString(),
+                TipoHabitacion = dr["TipoHabitacion"].ToString(),
+                FechaEntrada = Convert.ToDateTime(dr["FechaEntrada"]),
+                FechaSalida = Convert.ToDateTime(dr["FechaSalida"]),
+                CantidadDias = Convert.ToInt32(dr["CantidadDias"]),
+                PrecioDia = Convert.ToDecimal(dr["PrecioDia"]),
+                Total = Convert.ToDecimal(dr["Total"]),
+                Estado = dr["Estado"].ToString() ?? string.Empty,
+                FechaRegistro = Convert.ToDateTime(dr["FechaRegistro"]),
+                FechaCheckInReal = dr["FechaCheckInReal"] == DBNull.Value ? null : Convert.ToDateTime(dr["FechaCheckInReal"]),
+                FechaCheckOutReal = dr["FechaCheckOutReal"] == DBNull.Value ? null : Convert.ToDateTime(dr["FechaCheckOutReal"]),
+                MontoPagado = Convert.ToDecimal(dr["MontoPagado"])
+            };
+        }
+
+        private void MostrarMensaje(string titulo, string texto, string tipo)
+        {
+            TempData["SweetAlert_Title"] = titulo;
+            TempData["SweetAlert_Text"] = texto;
+            TempData["SweetAlert_Type"] = tipo;
         }
     }
 }

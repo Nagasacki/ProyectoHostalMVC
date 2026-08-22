@@ -1,365 +1,70 @@
-﻿@model ProyectoHostalMVC.Models.ReporteViewModel
-
-@{
-    ViewData["Title"] = "Reportes";
-}
-
-<div class="container mt-4">
-
-    <h2>Reportes</h2>
-
-    <p class="text-muted">
-        Reporte general del Hostal Velamor
-    </p>
-
-
-    <!-- FILTRO -->
-
-    <div class="card shadow-sm mb-4">
-
-        <div class="card-body">
-
-            <form asp-action="Index"
-                  method="get"
-                  class="row g-3">
-
-                <div class="col-md-4">
-
-                    <label class="form-label">
-                        Fecha Inicio
-                    </label>
-
-                    <input type="date"
-                           name="fechaInicio"
-                           value="@Model.FechaInicio.ToString("yyyy-MM-dd")"
-                           class="form-control" />
-
-                </div>
-
-
-                <div class="col-md-4">
-
-                    <label class="form-label">
-                        Fecha Fin
-                    </label>
-
-                    <input type="date"
-                           name="fechaFin"
-                           value="@Model.FechaFin.ToString("yyyy-MM-dd")"
-                           class="form-control" />
-
-                </div>
-
-
-                <div class="col-md-4 d-flex align-items-end">
-
-                    <button type="submit"
-                            class="btn btn-primary">
-
-                        Consultar
-
-                    </button>
-
-                </div>
-
-            </form>
-
-        </div>
-
-    </div>
-
-
-    <!-- RESUMEN -->
-
-    <div class="row g-3 mb-4">
-
-
-        <div class="col-md-3">
-
-            <div class="card shadow-sm border-primary">
-
-                <div class="card-body">
-
-                    <h6>
-                        Total Reservas
-                    </h6>
-
-                    <h2 class="text-primary">
-
-                        @Model.Resumen.TotalReservas
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-md-3">
-
-            <div class="card shadow-sm border-success">
-
-                <div class="card-body">
-
-                    <h6>
-                        Finalizadas
-                    </h6>
-
-                    <h2 class="text-success">
-
-                        @Model.Resumen.ReservasFinalizadas
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-md-3">
-
-            <div class="card shadow-sm border-danger">
-
-                <div class="card-body">
-
-                    <h6>
-                        Canceladas
-                    </h6>
-
-                    <h2 class="text-danger">
-
-                        @Model.Resumen.ReservasCanceladas
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-
-        <div class="col-md-3">
-
-            <div class="card shadow-sm border-warning">
-
-                <div class="card-body">
-
-                    <h6>
-                        Ingresos
-                    </h6>
-
-                    <h2 class="text-warning">
-
-                        S/ @Model.Resumen.TotalIngresos.ToString("0.00")
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- RESERVAS -->
-
-    <div class="card shadow-sm mb-4">
-
-        <div class="card-header bg-dark text-white">
-
-            Reservas del Periodo
-
-        </div>
-
-
-        <div class="card-body">
-
-            <div class="table-responsive">
-
-                <table class="table table-bordered table-hover">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>ID</th>
-                            <th>Cliente</th>
-                            <th>Habitación</th>
-                            <th>Tipo</th>
-                            <th>Entrada</th>
-                            <th>Salida</th>
-                            <th>Días</th>
-                            <th>Estado</th>
-                            <th>Total</th>
-
-                        </tr>
-
-                    </thead>
-
-
-                    <tbody>
-
-                        @foreach (var item in Model.Reservas)
-                        {
-                            <tr>
-
-                                <td>
-                                    @item.IdReserva
-                                </td>
-
-                                <td>
-                                    @item.NombreCliente
-                                </td>
-
-                                <td>
-                                    @item.NumeroHabitacion
-                                </td>
-
-                                <td>
-                                    @item.TipoHabitacion
-                                </td>
-
-                                <td>
-                                    @item.FechaEntrada.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-                                    @item.FechaSalida.ToString("dd/MM/yyyy")
-                                </td>
-
-                                <td>
-                                    @item.CantidadDias
-                                </td>
-
-
-                                <td>
-
-                                    @if (item.Estado == "Reservada")
-                                    {
-                                        <span class="badge bg-primary">
-                                            Reservada
-                                        </span>
-                                    }
-                                    else if (item.Estado == "Finalizada")
-                                    {
-                                        <span class="badge bg-success">
-                                            Finalizada
-                                        </span>
-                                    }
-                                    else if (item.Estado == "Cancelada")
-                                    {
-                                        <span class="badge bg-danger">
-                                            Cancelada
-                                        </span>
-                                    }
-
-                                </td>
-
-
-                                <td>
-
-                                    S/ @item.Total.ToString("0.00")
-
-                                </td>
-
-                            </tr>
-                        }
-
-                    </tbody>
-
-                </table>
-
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <!-- HABITACIONES -->
-
-    <div class="card shadow-sm">
-
-        <div class="card-header bg-dark text-white">
-
-            Estado Actual de Habitaciones
-
-        </div>
-
-
-        <div class="card-body">
-
-            <table class="table table-bordered table-hover">
-
-                <thead>
-
-                    <tr>
-                        <th>Número</th>
-                        <th>Tipo</th>
-                        <th>Precio</th>
-                        <th>Estado</th>
-                    </tr>
-
-                </thead>
-
-
-                <tbody>
-
-                    @foreach (var item in Model.Habitaciones)
-                    {
-                        <tr>
-
-                            <td>
-                                @item.Numero
-                            </td>
-
-                            <td>
-                                @item.Tipo
-                            </td>
-
-                            <td>
-                                S/ @item.Precio.ToString("0.00")
-                            </td>
-
-                            <td>
-
-                                @if (item.Estado == "Disponible")
-                                {
-                                    <span class="badge bg-success">
-                                        Disponible
-                                    </span>
-                                }
-                                else if (item.Estado == "Ocupada")
-                                {
-                                    <span class="badge bg-danger">
-                                        Ocupada
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge bg-warning text-dark">
-                                        @item.Estado
-                                    </span>
-                                }
-
-                            </td>
-
-                        </tr>
-                    }
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-    </div>
-
+@model ProyectoHostalMVC.Models.ReporteViewModel
+@{ ViewData["Title"] = "Reportes"; }
+
+<div class="page-heading d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div><h1>Reportes</h1><p>Ocupación e ingresos por rango de fechas.</p></div>
+    <button class="btn btn-outline-secondary" onclick="window.print()"><i class="bi bi-printer me-1"></i> Imprimir</button>
 </div>
+
+<div class="card p-3 mb-4">
+    <form asp-action="Index" method="get" class="row g-3 align-items-end">
+        <div class="col-md-4"><label class="form-label">Fecha inicial</label><input type="date" name="fechaInicio" value="@Model.FechaInicio.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-4"><label class="form-label">Fecha final</label><input type="date" name="fechaFin" value="@Model.FechaFin.ToString("yyyy-MM-dd")" class="form-control" /></div>
+        <div class="col-md-4 d-flex gap-2"><button class="btn btn-primary flex-grow-1">Consultar</button><a asp-action="Index" class="btn btn-outline-secondary">Restablecer</a></div>
+    </form>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg"><div class="card p-3 h-100"><small class="text-muted">Reservas</small><strong class="fs-4 mt-1">@Model.Resumen.TotalReservas</strong></div></div>
+    <div class="col-6 col-lg"><div class="card p-3 h-100"><small class="text-muted">Finalizadas</small><strong class="fs-4 mt-1">@Model.Resumen.ReservasFinalizadas</strong></div></div>
+    <div class="col-6 col-lg"><div class="card p-3 h-100"><small class="text-muted">Facturado</small><strong class="fs-4 mt-1">S/ @Model.Resumen.TotalFacturado.ToString("0.00")</strong></div></div>
+    <div class="col-6 col-lg"><div class="card p-3 h-100"><small class="text-muted">Cobrado</small><strong class="fs-4 mt-1 text-success">S/ @Model.Resumen.TotalIngresos.ToString("0.00")</strong></div></div>
+    <div class="col-6 col-lg"><div class="card p-3 h-100"><small class="text-muted">Pendiente</small><strong class="fs-4 mt-1 text-danger">S/ @Model.Resumen.SaldoPendiente.ToString("0.00")</strong></div></div>
+</div>
+
+<div class="row g-4 mb-4">
+    <div class="col-lg-9">
+        <section class="card h-100">
+            <div class="card-header d-flex justify-content-between"><h2>Reservas del periodo</h2><span class="small text-muted">@Model.Reservas.Count registro(s)</span></div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead><tr><th>Código</th><th>Huésped</th><th>Habitación</th><th>Entrada</th><th>Estado</th><th class="text-end">Total</th><th class="text-end">Cobrado</th><th class="text-end">Saldo</th></tr></thead>
+                    <tbody>
+                        @if (Model.ReservasPaginadas.Items.Any())
+                        {
+                            foreach (var item in Model.ReservasPaginadas.Items)
+                            {
+                                <tr><td>#@item.IdReserva</td><td class="fw-semibold">@item.NombreCliente</td><td>Hab. @item.NumeroHabitacion</td><td>@item.FechaEntrada.ToString("dd/MM/yyyy")</td><td><span class="status status-@item.Estado?.ToLower().Replace(" ", "-")">@item.Estado</span></td><td class="text-end">S/ @item.Total.ToString("0.00")</td><td class="text-end text-success">S/ @item.MontoPagado.ToString("0.00")</td><td class="text-end text-danger">S/ @item.Saldo.ToString("0.00")</td></tr>
+                            }
+                        }
+                        else { <tr><td colspan="8" class="empty-row">No hay reservas en este periodo.</td></tr> }
+                    </tbody>
+                </table>
+            </div>
+            @if (Model.ReservasPaginadas.TotalPaginas > 1)
+            {
+                <div class="card-footer d-flex justify-content-between"><small>Página @Model.ReservasPaginadas.PaginaActual de @Model.ReservasPaginadas.TotalPaginas</small><ul class="pagination pagination-sm mb-0">@for (int i=1;i<=Model.ReservasPaginadas.TotalPaginas;i++){<li class="page-item @(i==Model.ReservasPaginadas.PaginaActual?"active":"")"><a class="page-link" asp-route-fechaInicio="@Model.FechaInicio.ToString("yyyy-MM-dd")" asp-route-fechaFin="@Model.FechaFin.ToString("yyyy-MM-dd")" asp-route-pagina="@i">@i</a></li>}</ul></div>
+            }
+        </section>
+    </div>
+    <div class="col-lg-3">
+        <section class="card h-100">
+            <div class="card-header"><h2>Pagos por método</h2></div>
+            <div class="card-body state-list">
+                @if (Model.PagosPorMetodo.Any())
+                {
+                    foreach (var p in Model.PagosPorMetodo)
+                    {
+                        <div><span>@p.Metodo <small class="text-muted">(@p.Cantidad)</small></span><strong>S/ @p.Total.ToString("0.00")</strong></div>
+                    }
+                }
+                else { <p class="text-muted small mb-0">No hay pagos en este periodo.</p> }
+            </div>
+        </section>
+    </div>
+</div>
+
+<section class="card">
+    <div class="card-header"><h2>Estado actual de habitaciones</h2></div>
+    <div class="table-responsive"><table class="table"><thead><tr><th>Número</th><th>Tipo</th><th>Tarifa</th><th>Estado</th></tr></thead><tbody>@foreach(var h in Model.Habitaciones){<tr><td class="fw-semibold">Hab. @h.Numero</td><td>@h.Tipo</td><td>S/ @h.Precio.ToString("0.00")</td><td><span class="badge-subtle-neutral">@h.Estado</span></td></tr>}</tbody></table></div>
+</section>
